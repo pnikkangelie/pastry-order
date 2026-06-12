@@ -5,7 +5,8 @@ var SHEET_MENU   = 'Menu'
 // ── GET ────────────────────────────────────────────────────
 function doGet(e) {
   var action = e.parameter && e.parameter.action
-  if (action === 'menu') return getMenuData()
+  if (action === 'menu')    return getMenuData()
+  if (action === 'reviews') return getReviewsData()
   return getOrdersData()
 }
 
@@ -37,6 +38,30 @@ function getOrdersData() {
     return jsonOut({ orders: orders })
   } catch (err) {
     return jsonOut({ orders: [], error: err.toString() })
+  }
+}
+
+function getReviewsData() {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reviews')
+    if (!sheet || sheet.getLastRow() <= 1) return jsonOut({ reviews: [] })
+    var rows = sheet.getDataRange().getValues()
+    var reviews = []
+    for (var i = 1; i < rows.length; i++) {
+      var r = rows[i]
+      if (!r[0]) continue
+      reviews.push({
+        orderId:   String(r[0]),
+        itemName:  String(r[1] || ''),
+        rating:    parseInt(r[2]) || 5,
+        comment:   String(r[3] || ''),
+        timestamp: r[4] instanceof Date ? r[4].getTime() : 0
+      })
+    }
+    reviews.reverse()
+    return jsonOut({ reviews: reviews.slice(0, 100) })
+  } catch(err) {
+    return jsonOut({ reviews: [], error: err.toString() })
   }
 }
 
@@ -227,6 +252,26 @@ function doPost(e) {
           if (String(vals[i][0]) === String(data.id)) { msheet.deleteRow(i+1); break }
         }
       }
+      return jsonOut({ success: true })
+    }
+
+    if (data.action === 'addReview') {
+      var rsheet = ss.getSheetByName('Reviews') || ss.insertSheet('Reviews')
+      if (rsheet.getLastRow() === 0) {
+        rsheet.appendRow(['Order ID', 'Item', 'Rating', 'Comment', 'Submitted'])
+        rsheet.getRange(1,1,1,5).setFontWeight('bold').setBackground('#7b4a2c').setFontColor('#ffffff')
+        rsheet.setFrozenRows(1)
+        rsheet.setColumnWidth(4, 350)
+      }
+      var rv = data.review || {}
+      var rating = Math.min(5, Math.max(1, parseInt(rv.rating) || 5))
+      rsheet.appendRow([
+        sanitize(rv.orderId, 32),
+        sanitize(rv.itemName, 100),
+        rating,
+        sanitize(rv.comment, 500),
+        new Date()
+      ])
       return jsonOut({ success: true })
     }
 

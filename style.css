@@ -329,7 +329,7 @@ body {
 .admin-top h1 { font-size: 1.1rem; }
 .admin-top p  { font-size: .8rem; opacity: .8; }
 .stats-bar {
-  display: grid; grid-template-columns: repeat(5,1fr); gap: .9rem;
+  display: grid; grid-template-columns: repeat(6,1fr); gap: .9rem;
   max-width: 900px; margin: 0 auto;
   padding-bottom: 1.1rem;
 }
@@ -421,7 +421,7 @@ body {
 @media (max-width: 700px) {
   .page-layout { grid-template-columns: 1fr; }
   .summary-col { position: static; order: -1; }
-  .stats-bar { grid-template-columns: repeat(3,1fr); }
+  .stats-bar { grid-template-columns: repeat(3,1fr); max-width:100%; }
   .fields-row, .date-time-row { grid-template-columns: 1fr; }
   .order-detail-grid { grid-template-columns: 1fr; }
   .search-input { margin-left: 0; width: 100%; }

@@ -479,6 +479,23 @@
     .ty-cta-print { background: none; border: none; color: var(--muted); font-size: .8rem; cursor: pointer; padding: .1rem; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
     .ty-cta-print:hover { color: var(--primary); }
 
+    /* ── Post-order rating ───────────────────────────────────── */
+    .rating-section { padding: .9rem 1.25rem .6rem; border-top: 1px solid var(--border); }
+    .rating-prompt { text-align:center; font-size:.88rem; font-weight:700; color:var(--text); margin:0 0 .6rem; }
+    .star-row { display:flex; justify-content:center; gap:.15rem; margin-bottom:.65rem; }
+    .star-btn { background:none; border:none; font-size:2.1rem; cursor:pointer; color:#d1d5db; line-height:1; padding:.05rem .1rem; transition:color .12s, transform .1s; touch-action:manipulation; }
+    .star-btn.active { color:#f59e0b; }
+    .star-btn:hover { color:#f59e0b; transform:scale(1.15); }
+    .rating-comment { width:100%; resize:none; border:1px solid var(--border); border-radius:9px; padding:.5rem .75rem; font:inherit; font-size:.84rem; color:var(--text); background:var(--bg); box-sizing:border-box; }
+    .rating-comment:focus { outline:none; border-color:var(--primary); }
+    .rating-actions { display:flex; align-items:center; gap:.6rem; margin-top:.65rem; }
+    .rating-actions .btn-primary { flex:1; padding:.6rem; font-size:.88rem; }
+    .rating-skip { background:none; border:none; color:var(--muted); font-size:.82rem; cursor:pointer; padding:.3rem .4rem; text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+    .rating-skip:hover { color:var(--primary); }
+    .rating-thanks { text-align:center; padding:.9rem 1.25rem; border-top:1px solid var(--border); }
+    .rating-thanks-icon { font-size:1.6rem; display:block; margin-bottom:.25rem; }
+    .rating-thanks p { font-size:.84rem; color:var(--muted); margin:0; }
+
     /* ── Small-screen overrides (≤ 480px) ───────────────────── */
     @media (max-width: 480px) {
       .order-wrap { padding: 1.25rem .9rem 6.5rem; }
@@ -854,6 +871,28 @@
       <span class="ty-order-id" id="ty-order-id"></span>
     </div>
     <div class="receipt-body" id="receipt-body"></div>
+
+    <!-- Rating section — shown once after order placed -->
+    <div class="rating-section" id="rating-section" style="display:none">
+      <p class="rating-prompt">How was your experience?</p>
+      <div class="star-row" id="star-row">
+        <button class="star-btn" data-r="1" type="button">★</button>
+        <button class="star-btn" data-r="2" type="button">★</button>
+        <button class="star-btn" data-r="3" type="button">★</button>
+        <button class="star-btn" data-r="4" type="button">★</button>
+        <button class="star-btn" data-r="5" type="button">★</button>
+      </div>
+      <textarea class="rating-comment" id="rating-comment" rows="2" placeholder="Leave a comment… (optional)"></textarea>
+      <div class="rating-actions">
+        <button class="btn-primary" id="rating-submit-btn" type="button">Submit Review</button>
+        <button class="rating-skip" type="button" onclick="skipRating()">Skip</button>
+      </div>
+    </div>
+    <div class="rating-thanks" id="rating-thanks" style="display:none">
+      <span class="rating-thanks-icon">🙏</span>
+      <p>Thank you for your feedback!</p>
+    </div>
+
     <div class="ty-cta">
       <div class="ty-cta-main">
         <button class="btn-primary" id="order-again-btn">Order Again</button>
@@ -1716,6 +1755,67 @@ function showReceipt(order) {
     '</div>'
 
   receiptModal.style.display = 'flex'
+  initRating(order)
+}
+
+// ── Post-order star rating ─────────────────────────────────
+var _ratingSelected  = 0
+var _ratingOrderId   = ''
+var _ratingOrderItems = []
+
+function initRating(order) {
+  _ratingSelected   = 0
+  _ratingOrderId    = order.id
+  _ratingOrderItems = order.items || []
+  document.getElementById('rating-section').style.display = 'block'
+  document.getElementById('rating-thanks').style.display  = 'none'
+  document.getElementById('rating-comment').value = ''
+  _updateStars(0)
+}
+
+function _updateStars(count) {
+  document.querySelectorAll('.star-btn').forEach(function(btn) {
+    btn.classList.toggle('active', parseInt(btn.dataset.r) <= count)
+  })
+}
+
+document.querySelectorAll('.star-btn').forEach(function(btn) {
+  var r = parseInt(btn.dataset.r)
+  btn.addEventListener('click',      function() { _ratingSelected = r; _updateStars(r) })
+  btn.addEventListener('mouseenter', function() { _updateStars(r) })
+  btn.addEventListener('mouseleave', function() { _updateStars(_ratingSelected) })
+})
+
+document.getElementById('rating-submit-btn').addEventListener('click', function() {
+  if (!_ratingSelected) {
+    document.getElementById('star-row').style.animation = 'none'
+    document.querySelectorAll('.star-btn').forEach(function(b) { b.style.color = '#ef4444' })
+    setTimeout(function() {
+      document.querySelectorAll('.star-btn').forEach(function(b) { b.style.color = '' })
+      _updateStars(0)
+    }, 600)
+    return
+  }
+  var comment  = document.getElementById('rating-comment').value.trim()
+  var itemName = _ratingOrderItems.length ? _ratingOrderItems[0].name : ''
+  if (typeof ACTIVE_URL !== 'undefined' && ACTIVE_URL && ACTIVE_URL !== PLACEHOLDER) {
+    fetch(ACTIVE_URL, {
+      method: 'POST', mode: 'no-cors',
+      body: JSON.stringify({ action: 'addReview', review: {
+        orderId:   _ratingOrderId,
+        itemName:  itemName,
+        rating:    _ratingSelected,
+        comment:   comment,
+        timestamp: Date.now()
+      }})
+    }).catch(function() {})
+  }
+  document.getElementById('rating-section').style.display = 'none'
+  document.getElementById('rating-thanks').style.display  = 'block'
+})
+
+function skipRating() {
+  document.getElementById('rating-section').style.display = 'none'
 }
 
 document.getElementById('print-btn').addEventListener('click', function() {

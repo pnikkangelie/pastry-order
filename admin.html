@@ -6,6 +6,7 @@
   <title>Admin — Pastry Palette by Nikk</title>
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
+  <script src="menu.js"></script>
   <script src="branding.js"></script>
   <style>
     .page-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1.2rem; }
@@ -121,6 +122,16 @@
     .banner-view:hover { transform: scale(1.04); }
     .banner-close { background: none; border: none; color: rgba(255,255,255,.7); font-size: 1.2rem; cursor: pointer; flex-shrink: 0; padding: .1rem .25rem; line-height: 1; transition: color .15s; }
     .banner-close:hover { color: #fff; }
+
+    /* ── Reviews tab ──────────────────────────────────────── */
+    .review-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem; }
+    .review-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:.85rem 1rem; margin-bottom:.6rem; box-shadow:var(--shadow); }
+    .review-header { display:flex; align-items:center; gap:.65rem; margin-bottom:.35rem; flex-wrap:wrap; }
+    .review-stars { font-size:1.05rem; letter-spacing:.05em; color:#f59e0b; flex-shrink:0; }
+    .review-item { font-size:.8rem; font-weight:700; color:var(--primary); background:var(--primary-lt); padding:.15rem .55rem; border-radius:99px; }
+    .review-date { font-size:.74rem; color:var(--muted); margin-left:auto; white-space:nowrap; }
+    .review-comment { font-size:.86rem; color:var(--text); margin:.1rem 0 .3rem; line-height:1.55; }
+    .review-meta { font-size:.72rem; color:var(--muted); font-family:monospace; }
   </style>
 </head>
 <body>
@@ -202,6 +213,15 @@
       <div class="stat-label">Total Revenue</div>
       <div class="stat-sub" id="stat-revenue-sub">₱0 today</div>
     </div>
+    <!-- Top Item -->
+    <div class="stat-card" title="Most ordered item across all orders">
+      <div class="stat-card-head">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-num" id="stat-top-count" style="color:var(--accent)">—</div>
+      </div>
+      <div class="stat-label">Top Item</div>
+      <div class="stat-sub" id="stat-top-name">No orders yet</div>
+    </div>
   </div>
 </div>
 
@@ -252,6 +272,7 @@
   <div class="page-tabs">
     <button class="page-tab active" data-tab="orders">Orders</button>
     <button class="page-tab" data-tab="menu">Menu</button>
+    <button class="page-tab" data-tab="reviews">★ Reviews</button>
     <button class="page-tab" data-tab="settings">⚙ Settings</button>
   </div>
 
@@ -556,6 +577,15 @@
     </div><!-- /.settings-layout -->
   </div><!-- /#tab-settings -->
 
+  <!-- Reviews tab -->
+  <div class="tab-pane" id="tab-reviews">
+    <div class="review-toolbar">
+      <span id="reviews-summary" style="font-size:.85rem;color:var(--muted)">—</span>
+      <button class="btn-outline btn-sm" onclick="loadReviews()">↻ Refresh</button>
+    </div>
+    <div id="reviews-list"></div>
+  </div>
+
   </div><!-- /.admin-main -->
 
   <!-- ── Sidebar ────────────────────────────────────────── -->
@@ -655,7 +685,7 @@ function showConnStatus(cls, msg) {
   el.style.display = 'inline-block'
 }
 
-var TAB_LABELS = { orders: 'Orders', menu: 'Menu', settings: 'Settings' }
+var TAB_LABELS = { orders: 'Orders', menu: 'Menu', reviews: 'Reviews', settings: 'Settings' }
 
 function switchTab(name) {
   document.querySelectorAll('.page-tab').forEach(function(t) {
@@ -663,7 +693,8 @@ function switchTab(name) {
   })
   document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active') })
   document.getElementById('tab-' + name).classList.add('active')
-  if (name === 'menu') renderMenuTab()
+  if (name === 'menu')    renderMenuTab()
+  if (name === 'reviews') renderReviewsTab()
   if (name === 'settings') {
     document.getElementById('settings-url').value = ACTIVE_URL !== PLACEHOLDER ? ACTIVE_URL : ''
   }
@@ -881,6 +912,24 @@ function renderStats() {
   var badge = document.getElementById('payments-badge')
   badge.textContent = unconfirmed.length
   badge.style.display = unconfirmed.length > 0 ? '' : 'none'
+
+  // Most ordered item (by total qty across all orders)
+  var itemTotals = {}
+  allOrders.forEach(function(o) {
+    if (!Array.isArray(o.items)) return
+    o.items.forEach(function(it) {
+      var k = String(it.name || '').trim()
+      if (k) itemTotals[k] = (itemTotals[k] || 0) + (parseInt(it.qty) || 1)
+    })
+  })
+  var topName = null, topQty = 0
+  Object.keys(itemTotals).forEach(function(k) {
+    if (itemTotals[k] > topQty) { topQty = itemTotals[k]; topName = k }
+  })
+  document.getElementById('stat-top-count').textContent = topName ? topQty : '—'
+  var nameEl = document.getElementById('stat-top-name')
+  nameEl.textContent = topName || 'No orders yet'
+  nameEl.title       = topName || ''
 }
 
 // ── Status action buttons per order ───────────────────────
@@ -1639,6 +1688,58 @@ function safeUrl(url) {
 // Sanitise an order ID before embedding in onclick attributes
 function safeId(id) {
   return String(id).replace(/[^A-Za-z0-9\-_]/g, '')
+}
+
+// ── Reviews ────────────────────────────────────────────────
+var allReviews = []
+
+function renderReviewsTab() {
+  if (!allReviews.length) loadReviews()
+}
+
+function loadReviews() {
+  var el = document.getElementById('reviews-list')
+  el.innerHTML = '<p style="padding:1rem;color:var(--muted)">Loading reviews…</p>'
+  if (!isConfigured()) {
+    el.innerHTML = '<div class="empty-state"><p>Connect Google Sheet (in Settings → Integration) to load reviews.</p></div>'
+    document.getElementById('reviews-summary').textContent = '—'
+    return
+  }
+  fetch(ACTIVE_URL + '?action=reviews')
+    .then(function(r) { return r.json() })
+    .then(function(d) { allReviews = d.reviews || []; renderReviews() })
+    .catch(function() {
+      el.innerHTML = '<div class="empty-state"><p>Could not load reviews. Check your connection.</p></div>'
+      document.getElementById('reviews-summary').textContent = 'Error loading'
+    })
+}
+
+function renderReviews() {
+  var el      = document.getElementById('reviews-list')
+  var summary = document.getElementById('reviews-summary')
+  if (!allReviews.length) {
+    summary.textContent = 'No reviews yet'
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div><p>No reviews yet — customers can rate their order after placing it.</p></div>'
+    return
+  }
+  var avg = (allReviews.reduce(function(s,r){ return s + (r.rating||0) }, 0) / allReviews.length).toFixed(1)
+  var fiveStar = allReviews.filter(function(r){ return r.rating === 5 }).length
+  summary.textContent = allReviews.length + ' review' + (allReviews.length !== 1 ? 's' : '') +
+    ' · avg ' + avg + '★ · ' + fiveStar + ' five-star'
+  el.innerHTML = allReviews.map(function(rv) {
+    var stars = ''
+    for (var i = 1; i <= 5; i++) stars += i <= rv.rating ? '★' : '☆'
+    var date = rv.timestamp ? new Date(rv.timestamp).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }) : ''
+    return '<div class="review-card">' +
+      '<div class="review-header">' +
+        '<span class="review-stars">' + stars + '</span>' +
+        (rv.itemName ? '<span class="review-item">' + escHtml(rv.itemName) + '</span>' : '') +
+        '<span class="review-date">' + escHtml(date) + '</span>' +
+      '</div>' +
+      (rv.comment ? '<p class="review-comment">' + escHtml(rv.comment) + '</p>' : '') +
+      '<div class="review-meta">Order ' + escHtml(rv.orderId) + '</div>' +
+    '</div>'
+  }).join('')
 }
 
 // ── PIN lock ───────────────────────────────────────────────
