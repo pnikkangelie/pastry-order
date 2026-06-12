@@ -16,3 +16,7 @@
 /menu.js
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
+
+/pin-config.js
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache

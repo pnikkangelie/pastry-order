@@ -6,7 +6,8 @@
   <title>Admin — Pastry Palette by Nikk</title>
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
-  <script>document.write('<scr\x69pt src="menu.js?_=' + Date.now() + '"><\/scr\x69pt>')</script>
+  <script src="pin-config.js"></script>
+  <script src="menu.js"></script>
   <script src="branding.js"></script>
   <style>
     .page-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1.2rem; }
@@ -1362,20 +1363,33 @@ function publishMenu() {
   try { landing  = JSON.parse(localStorage.getItem('scb_landing'))  || {} } catch(e) {}
 
   var currentPinHash = localStorage.getItem('scb_admin_pin_hash') ||
-    (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH)
-  var content =
+    (typeof ADMIN_BUNDLED_PIN !== 'undefined' && ADMIN_BUNDLED_PIN ? ADMIN_BUNDLED_PIN :
+     (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH))
+
+  // Download menu.js (menu, settings, branding)
+  var menuContent =
     'var BUNDLED_MENU = ' + JSON.stringify(menuItems, null, 2) + ';\n' +
     'var BUNDLED_PAYMENT = ' + JSON.stringify(payment, null, 2) + ';\n' +
     'var BUNDLED_BRANDING = ' + JSON.stringify(branding, null, 2) + ';\n' +
     'var BUNDLED_LANDING = ' + JSON.stringify(landing, null, 2) + ';\n' +
     'var BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
+  var blob1 = new Blob([menuContent], { type: 'text/javascript' })
+  var url1  = URL.createObjectURL(blob1)
+  var a1    = document.createElement('a')
+  a1.href = url1; a1.download = 'menu.js'; a1.click()
+  URL.revokeObjectURL(url1)
 
-  var blob = new Blob([content], { type: 'text/javascript' })
-  var url  = URL.createObjectURL(blob)
-  var a    = document.createElement('a')
-  a.href = url; a.download = 'menu.js'; a.click()
-  URL.revokeObjectURL(url)
-  showToast('✓ menu.js downloaded — replace the file in your folder and redeploy to Netlify.', 'ok')
+  // Download pin-config.js (authoritative PIN — this tiny file is always fresh on every browser)
+  setTimeout(function() {
+    var pinContent = 'var ADMIN_BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
+    var blob2 = new Blob([pinContent], { type: 'text/javascript' })
+    var url2  = URL.createObjectURL(blob2)
+    var a2    = document.createElement('a')
+    a2.href = url2; a2.download = 'pin-config.js'; a2.click()
+    URL.revokeObjectURL(url2)
+  }, 300)
+
+  showToast('✓ menu.js + pin-config.js downloaded — replace both files and redeploy to Netlify.', 'ok')
 }
 
 function showToast(msg, type) {
@@ -1757,7 +1771,11 @@ async function hashPin(pin) {
 function getStoredPinHash() {
   var local = localStorage.getItem('scb_admin_pin_hash')
   if (local) return local
-  // Only trust BUNDLED_PIN if it is not the factory default — means owner published a real PIN
+  // ADMIN_BUNDLED_PIN from pin-config.js — tiny no-cache file, never stale on any browser
+  if (typeof ADMIN_BUNDLED_PIN !== 'undefined' && ADMIN_BUNDLED_PIN && ADMIN_BUNDLED_PIN !== DEFAULT_PIN_HASH) {
+    return ADMIN_BUNDLED_PIN
+  }
+  // Fallback: BUNDLED_PIN from menu.js (may be stale on mobile due to cache)
   if (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN && BUNDLED_PIN !== DEFAULT_PIN_HASH) {
     return BUNDLED_PIN
   }
@@ -1894,7 +1912,9 @@ function renderSetupChecklist() {
   document.getElementById('default-pin-banner').style.display = pinChanged ? 'none' : 'flex'
 
   // Show "PIN not published" warning when local PIN differs from the deployed bundle
-  var bundledPinCurrent = typeof BUNDLED_PIN !== 'undefined' ? BUNDLED_PIN : DEFAULT_PIN_HASH
+  var bundledPinCurrent = (typeof ADMIN_BUNDLED_PIN !== 'undefined' && ADMIN_BUNDLED_PIN)
+    ? ADMIN_BUNDLED_PIN
+    : (typeof BUNDLED_PIN !== 'undefined' ? BUNDLED_PIN : DEFAULT_PIN_HASH)
   var pinUnpublished = pinChanged && localPinHash !== bundledPinCurrent
   document.getElementById('pin-unpublished-banner').style.display = pinUnpublished ? 'flex' : 'none'
 
