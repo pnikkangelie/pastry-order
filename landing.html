@@ -459,7 +459,7 @@ function renderFooter() {
 // ── Hero banner image + page background ────────────────────
 function applyHeroBanner() {
   try {
-    var b = JSON.parse(localStorage.getItem('scb_branding')) || {}
+    var b = getBranding()
     document.documentElement.style.setProperty('--bg', b.bg_color || '#faf8f5')
     var hero = document.getElementById('land-hero')
     if (hero && b.banner_img && (/^https?:\/\//i.test(b.banner_img) || /^data:image\//i.test(b.banner_img))) {
