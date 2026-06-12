@@ -1441,7 +1441,12 @@ document.getElementById('brand-bg').addEventListener('input', function() {
 // ── Payment settings ───────────────────────────────────────
 function loadPaymentForm() {
   try {
-    var s = JSON.parse(localStorage.getItem('scb_payment')) || {}
+    var stored = localStorage.getItem('scb_payment')
+    var s = stored ? (JSON.parse(stored) || {}) : {}
+    if (!stored && typeof BUNDLED_PAYMENT !== 'undefined' && BUNDLED_PAYMENT) {
+      s = BUNDLED_PAYMENT
+      localStorage.setItem('scb_payment', JSON.stringify(s))
+    }
     document.getElementById('pay-bank-name').value      = s.bank_name      || ''
     document.getElementById('pay-bank-acct').value      = s.bank_acct      || ''
     document.getElementById('pay-bank-acct-name').value = s.bank_acct_name || ''
@@ -1545,19 +1550,26 @@ function savePaymentSettings() {
 }
 
 function loadLandingForm() {
-  try { var s = JSON.parse(localStorage.getItem('scb_landing')) || {} } catch(e) { var s = {} }
-  document.getElementById('land-promo-active').checked  = !!s.promo_active
-  document.getElementById('land-promo-title').value     = s.promo_title  || ''
-  document.getElementById('land-promo-body').value      = s.promo_body   || ''
-  document.getElementById('land-promo-img').value       = s.promo_img    || ''
-  document.getElementById('land-news-active').checked   = !!s.news_active
-  document.getElementById('land-news-title').value      = s.news_title   || ''
-  document.getElementById('land-news-body').value       = s.news_body    || ''
-  document.getElementById('land-news-img').value        = s.news_img     || ''
-  document.getElementById('land-about-active').checked  = !!s.about_active
-  document.getElementById('land-about-text').value      = s.about_text   || ''
-  updateLandImgPreview('promo')
-  updateLandImgPreview('news')
+  try {
+    var stored = localStorage.getItem('scb_landing')
+    var s = stored ? (JSON.parse(stored) || {}) : {}
+    if (!stored && typeof BUNDLED_LANDING !== 'undefined' && BUNDLED_LANDING) {
+      s = BUNDLED_LANDING
+      localStorage.setItem('scb_landing', JSON.stringify(s))
+    }
+    document.getElementById('land-promo-active').checked  = !!s.promo_active
+    document.getElementById('land-promo-title').value     = s.promo_title  || ''
+    document.getElementById('land-promo-body').value      = s.promo_body   || ''
+    document.getElementById('land-promo-img').value       = s.promo_img    || ''
+    document.getElementById('land-news-active').checked   = !!s.news_active
+    document.getElementById('land-news-title').value      = s.news_title   || ''
+    document.getElementById('land-news-body').value       = s.news_body    || ''
+    document.getElementById('land-news-img').value        = s.news_img     || ''
+    document.getElementById('land-about-active').checked  = !!s.about_active
+    document.getElementById('land-about-text').value      = s.about_text   || ''
+    updateLandImgPreview('promo')
+    updateLandImgPreview('news')
+  } catch(e) {}
 }
 
 function saveLandingSettings() {
