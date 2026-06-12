@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pastry Palette by Nikk</title>
+  <meta property="og:title" content="Pastry Palette by Nikk">
+  <meta property="og:description" content="Every Dessert. A work of art">
+  <meta property="og:type" content="website">
+  <meta name="description" content="Every Dessert. A work of art">
+  <script src="config.js"></script>
+  <script src="menu.js"></script>
+  <script src="branding.js"></script>
+  <style>
+    :root {
+      --primary:    #7b4a2c;
+      --primary-h:  #6a3f25;
+      --primary-lt: #f5ede6;
+      --accent:     #c97d47;
+      --bg:         #faf8f5;
+      --surface:    #ffffff;
+      --border:     #ede0d4;
+      --text:       #2c1810;
+      --muted:      #8a7060;
+      --shadow:     0 2px 12px rgba(60,30,10,.09);
+      --shadow-lg:  0 8px 40px rgba(60,30,10,.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .land-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .85rem 1.5rem;
+      background: rgba(255,252,249,.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(230,217,206,.5);
+    }
+    .land-nav-brand { display: flex; align-items: center; gap: .45rem; font-weight: 800; font-size: 1rem; color: var(--text); text-decoration: none; flex-shrink: 0; }
+    .land-nav-brand span { font-size: 1.3rem; }
+    .land-nav-links { display: flex; align-items: center; gap: .1rem; flex: 1; justify-content: center; }
+    .land-nav-link {
+      color: var(--text); font-size: .875rem; font-weight: 600;
+      text-decoration: none; padding: .42rem .72rem; border-radius: 8px;
+      transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .land-nav-link:hover { background: rgba(123,74,44,.08); color: var(--primary); }
+    .land-nav-link.active { color: var(--primary); background: var(--primary-lt); }
+    .land-nav-order {
+      background: var(--primary); color: #fff; border: none; border-radius: 99px;
+      padding: .55rem 1.25rem; font-weight: 700; font-size: .875rem; cursor: pointer;
+      text-decoration: none; display: inline-block; flex-shrink: 0;
+      transition: background .15s, transform .12s;
+    }
+    .land-nav-order:hover { background: var(--primary-h); transform: translateY(-1px); }
+    .land-nav-burger {
+      display: none; background: none; border: none; cursor: pointer; flex-shrink: 0;
+      padding: .4rem; border-radius: 8px; color: var(--text); font-size: 1.35rem; line-height: 1;
+      transition: background .15s;
+    }
+    .land-nav-burger:hover { background: rgba(123,74,44,.08); }
+    .land-nav-order-mobile { display: none; }
+    @media (max-width: 700px) {
+      .land-nav { padding: .8rem 1.1rem; }
+      .land-nav-links { display: none; }
+      .land-nav-order { display: none; }
+      .land-nav-burger { display: flex; align-items: center; justify-content: center; }
+      .land-nav.nav-open .land-nav-links {
+        display: flex; flex-direction: column; align-items: stretch; gap: .1rem;
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: rgba(255,252,249,.97);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(230,217,206,.6);
+        padding: .55rem .8rem .8rem;
+      }
+      .land-nav.nav-open .land-nav-link { padding: .7rem .85rem; font-size: .93rem; }
+      .land-nav.nav-open .land-nav-order-mobile {
+        display: block; margin: .4rem .05rem .15rem;
+        text-align: center; border-radius: 99px;
+        background: var(--primary); color: #fff; font-weight: 700; font-size: .9rem;
+        padding: .7rem 1.25rem; text-decoration: none;
+      }
+    }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .land-hero {
+      min-height: 100vh;
+      background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 55%, var(--accent) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 7rem 1.5rem 5rem; position: relative; overflow: hidden;
+    }
+    .land-hero.has-banner { background-size: cover; background-position: center; }
+    .land-hero.has-banner::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(150deg, rgba(44,26,14,.82) 0%, rgba(123,74,44,.7) 55%, rgba(201,125,71,.6) 100%);
+    }
+    .land-hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 55% at 80% 15%, rgba(255,200,120,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 10% 85%, rgba(60,20,5,.28) 0%, transparent 55%);
+    }
+    .land-hero-content { position: relative; z-index: 1; max-width: 640px; }
+    .land-hero-emoji {
+      font-size: clamp(2.8rem, 8vw, 4.5rem); line-height: 1; display: block; margin-bottom: .8rem;
+      filter: drop-shadow(0 4px 18px rgba(0,0,0,.3));
+      animation: hero-drop .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes hero-drop   { from { opacity: 0; transform: translateY(-20px) scale(.8); } to { opacity: 1; transform: none; } }
+    @keyframes pageFadeOut { to { opacity: 0; transform: translateY(-8px); } }
+    body.page-exit { animation: pageFadeOut .25s ease forwards; pointer-events: none; }
+    .land-hero-title {
+      font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 900; letter-spacing: -.03em;
+      color: #fff; line-height: 1.06; margin-bottom: .7rem;
+      animation: hero-up .55s ease .15s both;
+    }
+    .land-hero-sub {
+      font-size: clamp(.95rem, 2.5vw, 1.15rem); color: rgba(255,255,255,.78);
+      margin-bottom: 2.2rem; animation: hero-up .55s ease .25s both;
+    }
+    @keyframes hero-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    .land-hero-actions { display: flex; gap: .85rem; justify-content: center; flex-wrap: wrap; animation: hero-up .55s ease .35s both; }
+    .land-btn-primary {
+      background: #fff; color: var(--primary); font-weight: 800; font-size: 1rem;
+      border: none; border-radius: 99px; padding: .9rem 2.2rem; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .land-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.26); }
+    .land-btn-ghost {
+      background: rgba(255,255,255,.14); color: #fff; font-weight: 600; font-size: .95rem;
+      border: 1.5px solid rgba(255,255,255,.4); border-radius: 99px; padding: .85rem 1.8rem;
+      text-decoration: none; display: inline-block; backdrop-filter: blur(6px);
+      transition: background .15s, transform .15s;
+    }
+    .land-btn-ghost:hover { background: rgba(255,255,255,.22); transform: translateY(-2px); }
+    .land-scroll-hint {
+      position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.45); font-size: .78rem; display: flex; flex-direction: column; align-items: center; gap: .3rem; z-index: 1;
+    }
+    .land-scroll-arrow { font-size: 1.15rem; animation: bounce .2s ease infinite alternate; }
+    @keyframes bounce { to { transform: translateY(5px); } }
+
+    /* ── Section shell ───────────────────────────────────────── */
+    .land-section { padding: 4.5rem 1.5rem; max-width: 1120px; margin: 0 auto; }
+    .land-section-alt { background: var(--surface); }
+    .land-section-alt > .land-section { max-width: 1120px; margin: 0 auto; }
+    #news-section, #about-section {
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
+    }
+    #news-section .land-section, #about-section .land-section {
+      width: 100%;
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+    #news-section .news-card {
+      max-width: 780px;
+      margin: 2.5rem auto 0;
+      padding: 2.8rem 3rem;
+      border-left-width: 5px;
+    }
+    #news-section .news-icon  { font-size: 3.2rem; }
+    #news-section .news-title { font-size: 1.35rem; }
+    #news-section .news-body  { font-size: .97rem; line-height: 1.9; }
+    #about-section .about-icon  { font-size: 4.5rem; margin-bottom: 1.5rem; }
+    #about-section .about-text  { font-size: 1rem; line-height: 2.1; max-width: 600px; margin: 0 auto; }
+    #about-section .section-title { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: .75rem; }
+    .section-eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); font-weight: 700; margin-bottom: .4rem; }
+    .section-title { font-size: clamp(1.4rem, 3.5vw, 1.95rem); font-weight: 900; letter-spacing: -.025em; color: var(--text); margin-bottom: .5rem; line-height: 1.15; }
+    .section-sub { color: var(--muted); font-size: .93rem; max-width: 500px; line-height: 1.7; }
+
+    /* ── Featured items ──────────────────────────────────────── */
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; margin-top: 2rem; }
+    .feat-card { background: var(--surface); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
+    .feat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .feat-card-img {
+      width: 100%; height: 162px; background: var(--primary-lt);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+    }
+    .feat-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
+    .feat-card:hover .feat-card-img img { transform: scale(1.06); }
+    .feat-card-body { padding: 1rem 1.1rem 1.2rem; }
+    .feat-card-cat   { font-size: .68rem; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); font-weight: 700; margin-bottom: .2rem; }
+    .feat-card-name  { font-size: .96rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+    .feat-card-desc  { font-size: .81rem; color: var(--muted); line-height: 1.55; margin-bottom: .6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .feat-card-price { font-size: 1.05rem; font-weight: 800; color: var(--primary); }
+    .feat-see-more { display: inline-flex; align-items: center; gap: .3rem; margin-top: 1.3rem; color: var(--primary); font-weight: 700; font-size: .9rem; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color .15s; }
+    .feat-see-more:hover { border-color: var(--primary); }
+    #featured-empty { display: none; color: var(--muted); font-size: .9rem; margin-top: 1.5rem; }
+
+    /* ── Promo banner ────────────────────────────────────────── */
+    #promo-section { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); text-align: center; padding: 3.8rem 1.5rem; }
+    .promo-badge { display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); border-radius: 99px; font-size: .73rem; font-weight: 700; padding: .25rem .9rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .8rem; color: #fff; }
+    .promo-title { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; letter-spacing: -.025em; color: #fff; margin-bottom: .5rem; }
+    .promo-body  { font-size: .97rem; color: rgba(255,255,255,.85); max-width: 480px; margin: 0 auto 1.8rem; line-height: 1.7; }
+
+    /* ── What's New ──────────────────────────────────────────── */
+    .news-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 2rem 2.2rem; max-width: 700px; margin: 2rem auto 0; display: flex; gap: 1.5rem; align-items: flex-start; border-left: 4px solid var(--accent); }
+    .news-icon  { font-size: 2.4rem; flex-shrink: 0; line-height: 1; }
+    .news-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
+    .news-body  { font-size: .9rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── About ───────────────────────────────────────────────── */
+    .about-wrap { max-width: 680px; margin: 0 auto; text-align: center; }
+    .about-icon { font-size: 3rem; display: block; margin-bottom: 1.1rem; line-height: 1; }
+    .about-text { font-size: .97rem; color: var(--muted); line-height: 1.9; }
+
+    /* ── Final CTA ───────────────────────────────────────────── */
+    #cta-section {
+      background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 60%, var(--accent) 100%);
+      text-align: center; padding: 5.5rem 1.5rem; position: relative; overflow: hidden;
+    }
+    #cta-section::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 50% at 75% 20%, rgba(255,200,120,.15) 0%, transparent 60%);
+    }
+    .cta-inner { position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(1.65rem, 5vw, 2.6rem); font-weight: 900; letter-spacing: -.03em; color: #fff; margin-bottom: .65rem; line-height: 1.1; }
+    .cta-sub   { color: rgba(255,255,255,.72); font-size: .97rem; margin-bottom: 2.2rem; }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    .land-footer { background: #1c110a; color: rgba(255,255,255,.45); text-align: center; padding: 1.75rem 1.5rem; font-size: .8rem; line-height: 1.7; }
+    .land-footer strong { color: rgba(255,255,255,.75); }
+
+    /* ── Mobile ──────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .land-hero { min-height: 85vh; padding-bottom: 4rem; }
+      .news-card { flex-direction: column; gap: .75rem; padding: 1.4rem; }
+      .feat-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: .9rem; }
+      .land-section { padding: 3.2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ─────────────────────────────────────────────────── -->
+<nav class="land-nav" id="land-nav">
+  <a href="landing.html" class="land-nav-brand">
+    <span class="brand-emoji">🥐</span>
+    <span class="brand-name">Sweet Crumb Bakery</span>
+  </a>
+  <div class="land-nav-links" id="land-nav-links">
+    <!-- Populated by buildNav() after sections are shown/hidden -->
+  </div>
+  <a href="index.html" class="land-nav-order">Order Now →</a>
+  <button class="land-nav-burger" id="nav-burger" onclick="toggleNavMenu()" aria-label="Open menu">☰</button>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="land-hero" id="land-hero">
+  <div class="land-hero-content">
+    <span class="land-hero-emoji brand-emoji">🥐</span>
+    <h1 class="land-hero-title brand-name">Sweet Crumb Bakery</h1>
+    <p class="land-hero-sub" id="hero-tagline">Fresh baked goods — order ahead for pickup or delivery</p>
+    <div class="land-hero-actions">
+      <a href="index.html" class="land-btn-primary">Start Your Order</a>
+      <a href="#featured" class="land-btn-ghost">See Today's Picks ↓</a>
+    </div>
+  </div>
+  <div class="land-scroll-hint">
+    <span>Scroll to explore</span>
+    <span class="land-scroll-arrow">↓</span>
+  </div>
+</section>
+
+<!-- ── Featured Today ───────────────────────────────────────── -->
+<section id="featured">
+  <div class="land-section">
+    <div class="section-eyebrow">Today's Picks</div>
+    <h2 class="section-title">Fresh From the Oven</h2>
+    <p class="section-sub">Handcrafted every morning — order ahead to make sure yours is ready.</p>
+    <div class="feat-grid" id="feat-grid"></div>
+    <p id="featured-empty">Menu items coming soon — check back later!</p>
+    <a href="index.html" class="feat-see-more" id="feat-see-more" style="display:none">See full menu &amp; order →</a>
+  </div>
+</section>
+
+<!-- ── Promo Banner ─────────────────────────────────────────── -->
+<section id="promo-section" style="display:none">
+  <div class="promo-badge">Limited Offer</div>
+  <div class="promo-title" id="promo-title"></div>
+  <div class="promo-body"  id="promo-body"></div>
+  <a href="index.html" class="land-btn-primary" style="font-size:.95rem;padding:.8rem 2rem">Order Now →</a>
+</section>
+
+<!-- ── What's New ───────────────────────────────────────────── -->
+<section id="news-section" style="display:none" class="land-section-alt">
+  <div class="land-section">
+    <div class="section-eyebrow">What's New</div>
+    <h2 class="section-title">Fresh Announcements</h2>
+    <div class="news-card">
+      <div class="news-icon">🆕</div>
+      <div>
+        <div class="news-title" id="news-title"></div>
+        <div class="news-body"  id="news-body"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── About ────────────────────────────────────────────────── -->
+<section id="about-section" style="display:none">
+  <div class="land-section">
+    <div class="about-wrap">
+      <span class="about-icon brand-emoji">🥐</span>
+      <div class="section-eyebrow" style="text-align:center">About Us</div>
+      <h2 class="section-title" style="text-align:center">Our Story</h2>
+      <p class="about-text" id="about-text"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ────────────────────────────────────────────── -->
+<section id="cta-section">
+  <div class="cta-inner">
+    <div class="cta-title">Ready to treat yourself?</div>
+    <div class="cta-sub">Place your order now — we'll have it fresh and ready for you.</div>
+    <a href="index.html" class="land-btn-primary">Start Your Order</a>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer class="land-footer">
+  <div><strong class="brand-name">Sweet Crumb Bakery</strong></div>
+  <div id="footer-contact"></div>
+  <div style="margin-top:.4rem;opacity:.5">© <span id="footer-year"></span> All rights reserved.</div>
+</footer>
+
+<script>
+var PLACEHOLDER = 'PASTE_YOUR_SCRIPT_URL_HERE'
+var ACTIVE_URL  = localStorage.getItem('scb_script_url') || (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : PLACEHOLDER)
+var MENU = []
+
+function getLandingSettings() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('scb_landing'))
+    if (stored && Object.keys(stored).length) return stored
+  } catch(e) {}
+  if (typeof BUNDLED_LANDING !== 'undefined' && BUNDLED_LANDING && Object.keys(BUNDLED_LANDING).length) {
+    return BUNDLED_LANDING
+  }
+  return {}
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;')
+}
+
+function safeUrl(url) {
+  if (!url) return ''
+  var u = String(url).trim()
+  if (/^https?:\/\//i.test(u)) return u
+  if (/^data:image\//i.test(u)) return u
+  return ''
+}
+
+// ── Featured items ─────────────────────────────────────────
+function renderFeatured() {
+  var s = getLandingSettings()
+  var items = MENU.slice(0, 4)
+  if (s.featured_ids && s.featured_ids.length) {
+    var picked = s.featured_ids.map(function(id) {
+      return MENU.find(function(m) { return m.id === id })
+    }).filter(Boolean)
+    if (picked.length) items = picked.slice(0, 4)
+  }
+
+  var grid = document.getElementById('feat-grid')
+  var empty = document.getElementById('featured-empty')
+  var more  = document.getElementById('feat-see-more')
+
+  if (!items.length) {
+    empty.style.display = 'block'
+    return
+  }
+
+  grid.innerHTML = items.map(function(item) {
+    var src = safeUrl(item.img)
+    var imgHtml = src
+      ? '<img src="' + escHtml(src) + '" alt="' + escHtml(item.name) + '" onerror="this.parentElement.innerHTML=\'<span style=font-size:2.5rem>🥐</span>\'">'
+      : '<span style="font-size:2.5rem">🥐</span>'
+    return '<div class="feat-card">' +
+      '<div class="feat-card-img">' + imgHtml + '</div>' +
+      '<div class="feat-card-body">' +
+        '<div class="feat-card-cat">' + escHtml(item.cat) + '</div>' +
+        '<div class="feat-card-name">' + escHtml(item.name) + '</div>' +
+        (item.desc ? '<div class="feat-card-desc">' + escHtml(item.desc) + '</div>' : '') +
+        '<div class="feat-card-price">₱' + parseFloat(item.price).toFixed(2) + '</div>' +
+      '</div>' +
+    '</div>'
+  }).join('')
+
+  if (MENU.length > 4) more.style.display = 'inline-flex'
+}
+
+// ── Announcements ──────────────────────────────────────────
+function renderAnnouncements() {
+  var s = getLandingSettings()
+
+  var promo = document.getElementById('promo-section')
+  if (s.promo_active && s.promo_title) {
+    document.getElementById('promo-title').textContent = s.promo_title
+    document.getElementById('promo-body').textContent  = s.promo_body || ''
+    promo.style.display = 'block'
+  }
+
+  var news = document.getElementById('news-section')
+  if (s.news_active && s.news_title) {
+    document.getElementById('news-title').textContent = s.news_title
+    document.getElementById('news-body').textContent  = s.news_body || ''
+    news.style.display = 'block'
+  }
+
+  var about = document.getElementById('about-section')
+  if (s.about_active && s.about_text) {
+    document.getElementById('about-text').textContent = s.about_text
+    about.style.display = 'block'
+  }
+}
+
+// ── Load menu ──────────────────────────────────────────────
+function loadMenu() {
+  try {
+    var local = JSON.parse(localStorage.getItem('scb_menu'))
+    if (local && local.length) { MENU = local; renderFeatured(); return }
+  } catch(e) {}
+  if (typeof BUNDLED_MENU !== 'undefined' && BUNDLED_MENU.length) {
+    MENU = BUNDLED_MENU; renderFeatured(); return
+  }
+  if (!ACTIVE_URL || ACTIVE_URL === PLACEHOLDER) { renderFeatured(); return }
+  fetch(ACTIVE_URL + '?action=menu')
+    .then(function(r) { return r.json() })
+    .then(function(d) { MENU = d.items || []; renderFeatured() })
+    .catch(function() { renderFeatured() })
+}
+
+// ── Footer ─────────────────────────────────────────────────
+function renderFooter() {
+  document.getElementById('footer-year').textContent = new Date().getFullYear()
+  try {
+    var pay = JSON.parse(localStorage.getItem('scb_payment')) || {}
+    var parts = []
+    if (pay.messenger)     parts.push(pay.contact_label || 'Message us on Messenger')
+    var fc = document.getElementById('footer-contact')
+    if (parts.length) fc.textContent = parts.join(' · ')
+  } catch(e) {}
+}
+
+// ── Hero banner image + page background ────────────────────
+function applyHeroBanner() {
+  try {
+    var b = JSON.parse(localStorage.getItem('scb_branding')) || {}
+    document.documentElement.style.setProperty('--bg', b.bg_color || '#faf8f5')
+    var hero = document.getElementById('land-hero')
+    if (hero && b.banner_img && (/^https?:\/\//i.test(b.banner_img) || /^data:image\//i.test(b.banner_img))) {
+      hero.style.backgroundImage = 'url("' + b.banner_img.replace(/"/g, '%22') + '")'
+      hero.classList.add('has-banner')
+    }
+  } catch(e) {}
+}
+
+// ── Nav ────────────────────────────────────────────────────
+var NAV_SECTIONS = [
+  { id: 'featured',      label: 'Menu',        always: true },
+  { id: 'promo-section', label: 'Promos',       always: false },
+  { id: 'news-section',  label: "What's New",   always: false },
+  { id: 'about-section', label: 'About',        always: false },
+]
+
+function buildNav() {
+  var container = document.getElementById('land-nav-links')
+  var html = ''
+  NAV_SECTIONS.forEach(function(s) {
+    var el = document.getElementById(s.id)
+    if (s.always || (el && el.style.display !== 'none')) {
+      html += '<a href="#' + s.id + '" class="land-nav-link" onclick="closeNavMenu()">' + escHtml(s.label) + '</a>'
+    }
+  })
+  // Mobile-only Order Now at bottom of drawer
+  html += '<a href="index.html" class="land-nav-order-mobile">Order Now →</a>'
+  container.innerHTML = html
+  initScrollSpy()
+}
+
+function toggleNavMenu() {
+  document.getElementById('land-nav').classList.toggle('nav-open')
+}
+
+function closeNavMenu() {
+  document.getElementById('land-nav').classList.remove('nav-open')
+}
+
+document.addEventListener('click', function(e) {
+  var nav = document.getElementById('land-nav')
+  if (nav.classList.contains('nav-open') && !nav.contains(e.target)) closeNavMenu()
+})
+
+function initScrollSpy() {
+  function update() {
+    var scrollY = window.pageYOffset + 90  // offset for fixed nav height
+    var current = null
+    NAV_SECTIONS.forEach(function(s) {
+      var el = document.getElementById(s.id)
+      if (!el || el.style.display === 'none') return
+      if (el.getBoundingClientRect().top + window.pageYOffset <= scrollY) current = s.id
+    })
+    document.querySelectorAll('.land-nav-link').forEach(function(link) {
+      var id = (link.getAttribute('href') || '').slice(1)
+      link.classList.toggle('active', id === current)
+    })
+  }
+  window.addEventListener('scroll', update, { passive: true })
+  update()
+}
+
+// ── Init ───────────────────────────────────────────────────
+// Seamless page transition to order page
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a[href="index.html"]')
+  if (!link) return
+  e.preventDefault()
+  document.body.classList.add('page-exit')
+  setTimeout(function() { window.location.href = 'index.html' }, 230)
+})
+
+applyBranding()
+updateDocTitle()
+applyHeroBanner()
+renderAnnouncements()
+buildNav()
+loadMenu()
+renderFooter()
+</script>
+</body>
+</html>

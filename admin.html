@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Pastry Palette by Nikk</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="branding.js"></script>
+  <style>
+    .page-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1.2rem; }
+    .page-tab  { padding:.55rem 1.3rem; border:none; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; }
+    .page-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .tab-pane  { display:none; }
+    .tab-pane.active { display:block; }
+    .menu-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem; }
+    .menu-table { width:100%; border-collapse:collapse; font-size:.88rem; background:var(--surface); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+    .menu-table th { text-align:left; padding:.6rem .9rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:2px solid var(--border); background:var(--bg); }
+    .menu-table td { padding:.6rem .9rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .menu-table tr:last-child td { border-bottom:none; }
+    .menu-table tr:hover td { background:var(--bg); }
+    .item-modal-overlay { position:fixed; inset:0; background:rgba(60,42,30,.5); display:flex; align-items:center; justify-content:center; z-index:200; padding:1rem; }
+    .item-modal { background:var(--surface); border-radius:14px; box-shadow:var(--shadow-lg); max-width:400px; width:100%; padding:1.5rem; }
+    .item-modal h3 { font-size:1rem; font-weight:700; color:var(--primary); margin-bottom:1rem; }
+    .item-modal .field { margin-bottom:.75rem; }
+    .modal-actions { display:flex; gap:.65rem; justify-content:flex-end; margin-top:1.1rem; }
+    .chk-item { display:flex; align-items:center; gap:.45rem; font-size:.81rem; padding:.18rem 0; }
+    .chk-item .chk-icon { font-size:.9rem; flex-shrink:0; }
+    .chk-item a { color:var(--primary); font-weight:600; text-decoration:none; }
+    .chk-item a:hover { text-decoration:underline; }
+    .chk-done { color:var(--success); }
+    .chk-todo { color:var(--muted); }
+    /* Settings two-column layout */
+    .settings-layout { display:grid; grid-template-columns:210px 1fr; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; height:640px; }
+    .settings-sidebar { background:var(--bg); border-right:1px solid var(--border); padding:.5rem; display:flex; flex-direction:column; gap:.1rem; overflow-y:auto; }
+    .settings-nav-item { display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; background:none; border:none; border-radius:8px; padding:.65rem .75rem; cursor:pointer; font:inherit; transition:background .12s; }
+    .settings-nav-item:hover { background:rgba(123,74,44,.08); }
+    .settings-nav-item.active { background:var(--primary-lt); }
+    .settings-nav-icon { font-size:1.25rem; flex-shrink:0; line-height:1; }
+    .settings-nav-label { font-size:.85rem; font-weight:700; color:var(--text); line-height:1.2; }
+    .settings-nav-item.active .settings-nav-label { color:var(--primary); }
+    .settings-nav-sub { font-size:.72rem; color:var(--muted); margin-top:.1rem; line-height:1.3; }
+    .settings-content { padding:1.5rem; overflow-y:auto; }
+    .settings-panel { display:none; }
+    .settings-panel.active { display:block; }
+    .settings-panel > h3 { font-size:1rem; font-weight:800; color:var(--primary); margin-bottom:.25rem; }
+    .settings-panel > .panel-sub { font-size:.82rem; color:var(--muted); margin-bottom:1.2rem; padding-bottom:.85rem; border-bottom:1px solid var(--border); line-height:1.65; }
+    @media (max-width:640px) {
+      .settings-layout { grid-template-columns:1fr; }
+      .settings-sidebar { flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); padding:.4rem .5rem; gap:.1rem; }
+      .settings-nav-item { flex-direction:column; gap:.18rem; min-width:66px; padding:.45rem .5rem; align-items:center; text-align:center; flex-shrink:0; }
+      .settings-nav-sub { display:none; }
+      .settings-nav-label { font-size:.71rem; }
+      .settings-nav-icon { font-size:1.15rem; }
+      .settings-layout { height:auto; }
+      .settings-content { padding:1.1rem; }
+    }
+    .url-row { display:flex; gap:.5rem; align-items:center; }
+    .url-row input { flex:1; padding:.5rem .7rem; border:1.5px solid var(--border); border-radius:7px; font:inherit; font-size:.85rem; }
+    .url-row input:focus { outline:none; border-color:var(--accent); }
+    .conn-status { margin-top:.65rem; font-size:.82rem; padding:.35rem .7rem; border-radius:6px; display:inline-block; }
+    .conn-ok   { background:#e4f4eb; color:var(--success); }
+    .conn-fail { background:#fce8e8; color:var(--danger); }
+    .conn-wait { background:#f0f0f0; color:var(--muted); }
+    /* Lock screen */
+    .lock-screen {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999; padding:1rem;
+    }
+    .lock-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; box-shadow:var(--shadow-lg);
+      padding:2.5rem 2rem; text-align:center;
+      max-width:320px; width:100%;
+    }
+    .lock-logo { font-size:2.25rem; margin-bottom:.4rem; }
+    .lock-card h2 { font-size:1.05rem; color:var(--primary); margin-bottom:.25rem; }
+    .lock-card p  { font-size:.83rem; color:var(--muted); margin-bottom:1.4rem; }
+    .pin-input {
+      width:100%; text-align:center; font-size:1.6rem;
+      letter-spacing:.35em; padding:.6rem;
+      border:1.5px solid var(--border); border-radius:8px;
+      margin-bottom:.75rem; font-family:monospace; background:var(--bg);
+    }
+    .pin-input:focus { outline:none; border-color:var(--accent); background:var(--surface); }
+    .pin-error { color:var(--danger); font-size:.82rem; margin-bottom:.65rem; display:none; }
+    /* Toast notification */
+    .toast {
+      position:fixed; bottom:1.5rem; left:50%;
+      transform:translateX(-50%) translateY(12px);
+      padding:.6rem 1.2rem; border-radius:8px;
+      font-size:.86rem; font-weight:600;
+      opacity:0; pointer-events:none; z-index:10000;
+      white-space:nowrap; transition:opacity .2s, transform .2s;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast-ok  { background:var(--success); color:#fff; }
+    .toast-err { background:var(--danger);  color:#fff; }
+    .toast-info{ background:var(--text);    color:var(--surface); }
+    @keyframes live-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.7)} }
+    #live-dot { animation: live-pulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- ── PIN lock screen ────────────────────────────────────── -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-logo"><span class="brand-emoji">🥐</span></div>
+    <h2><span class="brand-name">Sweet Crumb Bakery</span></h2>
+    <p>Staff admin — enter your PIN to continue.</p>
+    <input class="pin-input" type="password" id="pin-input" placeholder="••••" maxlength="20" inputmode="numeric" autocomplete="current-password">
+    <div class="pin-error" id="pin-error">Incorrect PIN. Please try again.</div>
+    <button class="btn-primary" onclick="unlock()">Unlock</button>
+  </div>
+</div>
+
+<!-- ── Admin header ───────────────────────────────────────── -->
+<div class="admin-top">
+  <div class="admin-top-row">
+    <div>
+      <h1><span class="brand-emoji">🥐</span> <span class="brand-name">Sweet Crumb Bakery</span> — Orders</h1>
+      <p>Staff admin panel</p>
+    </div>
+    <button onclick="lock()" style="background:none;cursor:pointer;font:inherit;color:rgba(255,255,255,.85);font-size:.82rem;padding:.28rem .65rem;border:1px solid rgba(255,255,255,.35);border-radius:6px">🔒 Lock</button>
+  </div>
+
+  <div class="stats-bar">
+    <!-- Today's orders -->
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('orders');setFilter('all')" title="Orders scheduled for today">
+      <div class="stat-card-head">
+        <span class="stat-icon">📅</span>
+        <div class="stat-num" id="stat-today">0</div>
+      </div>
+      <div class="stat-label">Today's Orders</div>
+      <div class="stat-sub" id="stat-today-sub">₱0 total value</div>
+    </div>
+    <!-- Verify payment -->
+    <div class="stat-card" id="stat-unconfirmed-card" style="cursor:pointer" onclick="switchTab('orders');setFilter('awaiting_confirmation')" title="Click to review payments">
+      <div class="stat-card-head">
+        <span class="stat-icon">⚠️</span>
+        <div class="stat-num" id="stat-unconfirmed" style="color:#d97706">0</div>
+      </div>
+      <div class="stat-label">Verify Payment</div>
+      <div class="stat-sub" id="stat-unconfirmed-sub">₱0 awaiting</div>
+    </div>
+    <!-- Pending -->
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('orders');setFilter('pending')" title="Click to view pending orders">
+      <div class="stat-card-head">
+        <span class="stat-icon">🔄</span>
+        <div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div>
+      </div>
+      <div class="stat-label">Pending</div>
+      <div class="stat-sub" id="stat-pending-sub">0 pickup · 0 delivery</div>
+    </div>
+    <!-- Ready -->
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('orders');setFilter('ready')" title="Click to view ready orders">
+      <div class="stat-card-head">
+        <span class="stat-icon">✅</span>
+        <div class="stat-num" id="stat-ready" style="color:var(--info)">0</div>
+      </div>
+      <div class="stat-label">Ready</div>
+      <div class="stat-sub" id="stat-ready-sub">0 pickup · 0 delivery</div>
+    </div>
+    <!-- Revenue -->
+    <div class="stat-card" title="Total revenue from completed orders">
+      <div class="stat-card-head">
+        <span class="stat-icon">💰</span>
+        <div class="stat-num" id="stat-revenue" style="color:var(--success);font-size:1.2rem">₱0</div>
+      </div>
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-sub" id="stat-revenue-sub">₱0 today</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main body ──────────────────────────────────────────── -->
+<div class="admin-body">
+
+  <!-- ── Sidebar (left) ────────────────────────────────── -->
+  <aside class="admin-sidebar">
+
+    <!-- PIN warning -->
+    <div class="sidebar-widget sidebar-warn" id="default-pin-banner" style="display:none">
+      <div class="sidebar-widget-head">🔑 Security Alert</div>
+      <p style="font-size:.81rem;color:var(--text);line-height:1.55;margin-bottom:.75rem">
+        You're using the default PIN <code style="background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:4px">1234</code>.
+        Change it before sharing the admin link.
+      </p>
+      <button class="btn-primary btn-sm" style="width:100%;background:var(--danger)" onclick="switchTab('settings');switchSettingsPanel('security');document.getElementById('pin-current').focus()">Change PIN →</button>
+    </div>
+
+    <!-- Setup checklist -->
+    <div class="sidebar-widget" id="setup-checklist" style="display:none">
+      <div class="sidebar-widget-head">
+        <span>🚀 Setup Steps</span>
+        <button onclick="document.getElementById('setup-checklist').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:0;line-height:1">✕</button>
+      </div>
+      <div id="checklist-items" style="display:flex;flex-direction:column;gap:.3rem"></div>
+      <p style="font-size:.72rem;color:var(--muted);margin:.7rem 0 0;line-height:1.55">
+        All settings are in the
+        <a href="#" onclick="switchTab('settings');return false" style="color:var(--primary);font-weight:600;text-decoration:none">⚙ Settings</a> tab.
+      </p>
+    </div>
+
+  </aside><!-- /.admin-sidebar -->
+
+  <!-- ── Main content ───────────────────────────────────── -->
+  <div class="admin-main">
+
+  <!-- Tab nav -->
+  <div class="page-tabs">
+    <button class="page-tab active" data-tab="orders">Orders</button>
+    <button class="page-tab" data-tab="menu">Menu</button>
+    <button class="page-tab" data-tab="settings">⚙ Settings</button>
+  </div>
+
+  <!-- Orders tab -->
+  <div class="tab-pane active" id="tab-orders">
+    <div class="filter-row">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="awaiting_confirmation">⚠ Payments<span class="filter-tab-badge" id="payments-badge" style="display:none">0</span></button>
+      <button class="filter-tab" data-filter="pending">Pending</button>
+      <button class="filter-tab" data-filter="ready">Ready</button>
+      <button class="filter-tab" data-filter="complete">Complete</button>
+      <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+      <button class="btn-outline btn-sm" id="refresh-btn" style="margin-left:.2rem">↻ Refresh</button>
+      <span id="live-indicator" style="display:none;align-items:center;gap:.3rem;font-size:.73rem;color:var(--muted);margin-left:.15rem">
+        <span id="live-dot" style="width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;flex-shrink:0"></span>
+        <span id="live-label">Live</span>
+      </span>
+      <input class="search-input" id="search" type="search" placeholder="Search name or order #…">
+    </div>
+    <div class="order-list" id="order-list"></div>
+  </div>
+
+  <!-- Menu tab -->
+  <div class="tab-pane" id="tab-menu">
+    <div class="menu-toolbar">
+      <span style="font-size:.85rem;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="menu-count"></span>
+      <div style="display:flex;gap:.5rem;flex-shrink:0">
+        <button class="btn-outline btn-sm" onclick="publishMenu()" title="Downloads menu.js bundling your menu, payment settings, and branding. Replace the file in your project and redeploy to Netlify.">⬇ Publish to Netlify</button>
+        <button class="btn-primary btn-sm" onclick="openItemModal()">+ Add Item</button>
+      </div>
+    </div>
+    <div id="menu-list" style="overflow-x:auto"></div>
+  </div>
+
+
+  <!-- Settings tab -->
+  <div class="tab-pane" id="tab-settings">
+    <div class="settings-layout">
+
+      <!-- ── Sidebar nav ──────────────────────────────────── -->
+      <aside class="settings-sidebar">
+        <button class="settings-nav-item active" data-spanel="branding" onclick="switchSettingsPanel('branding')">
+          <span class="settings-nav-icon">🎨</span>
+          <div>
+            <div class="settings-nav-label">Branding</div>
+            <div class="settings-nav-sub">Colors, logo, background</div>
+          </div>
+        </button>
+        <button class="settings-nav-item" data-spanel="landing" onclick="switchSettingsPanel('landing')">
+          <span class="settings-nav-icon">🏠</span>
+          <div>
+            <div class="settings-nav-label">Landing Page</div>
+            <div class="settings-nav-sub">Promos, news, about</div>
+          </div>
+        </button>
+        <button class="settings-nav-item" data-spanel="payment" onclick="switchSettingsPanel('payment')">
+          <span class="settings-nav-icon">💳</span>
+          <div>
+            <div class="settings-nav-label">Payment</div>
+            <div class="settings-nav-sub">Bank, QR, e-wallet</div>
+          </div>
+        </button>
+        <button class="settings-nav-item" data-spanel="integration" onclick="switchSettingsPanel('integration')">
+          <span class="settings-nav-icon">🔗</span>
+          <div>
+            <div class="settings-nav-label">Integration</div>
+            <div class="settings-nav-sub">Google Apps Script</div>
+          </div>
+        </button>
+        <button class="settings-nav-item" data-spanel="security" onclick="switchSettingsPanel('security')">
+          <span class="settings-nav-icon">🔐</span>
+          <div>
+            <div class="settings-nav-label">Security</div>
+            <div class="settings-nav-sub">Admin PIN</div>
+          </div>
+        </button>
+      </aside>
+
+      <!-- ── Panel content ────────────────────────────────── -->
+      <div class="settings-content">
+
+        <!-- Branding panel -->
+        <div class="settings-panel active" id="spanel-branding">
+          <h3>Store Branding</h3>
+          <p class="panel-sub">Changes preview live — click <strong>Save Branding</strong> to keep them.</p>
+          <div class="fields-row" style="margin-bottom:.75rem">
+            <div class="field">
+              <label>Store Name</label>
+              <input type="text" id="brand-name" placeholder="Sweet Crumb Bakery">
+            </div>
+            <div class="field">
+              <label>Icon / Emoji</label>
+              <input type="text" id="brand-emoji" placeholder="🥐" maxlength="4">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:.75rem">
+            <label>Tagline <span style="font-weight:400;color:var(--muted)">(shown under the store name on the order page)</span></label>
+            <input type="text" id="brand-tagline" placeholder="Fresh baked goods — order ahead for pickup or delivery">
+          </div>
+          <div class="field" style="margin-bottom:1rem">
+            <label>Hero Background <span style="font-weight:400;color:var(--muted)">(optional — applies to both order page &amp; landing page)</span></label>
+            <div style="display:flex;gap:.45rem;align-items:center;margin-bottom:.35rem">
+              <input type="text" id="brand-banner-img" placeholder="https://… paste an image URL" style="flex:1;min-width:0">
+              <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">or</span>
+              <button type="button" class="btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap;padding:.35rem .75rem" onclick="document.getElementById('banner-upload-input').click()">⬆ Upload</button>
+              <input type="file" id="banner-upload-input" accept="image/*" style="display:none">
+            </div>
+            <div id="banner-preview-wrap" style="display:none;margin-top:.4rem;border-radius:10px;overflow:hidden;max-height:160px">
+              <img id="banner-preview-img" src="" alt="Banner preview" style="width:100%;height:160px;object-fit:cover;display:block">
+            </div>
+            <button type="button" id="banner-clear-btn" style="display:none;background:none;border:none;color:var(--danger);font-size:.78rem;cursor:pointer;margin-top:.3rem;text-decoration:underline;padding:0" onclick="clearBannerImg()">✕ Remove background image</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;margin-bottom:1rem">
+            <div class="field">
+              <label>Primary Color <span id="brand-primary-hex" style="font-family:monospace;font-weight:400;font-size:.8rem"></span></label>
+              <input type="color" id="brand-primary" style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;padding:3px">
+            </div>
+            <div class="field">
+              <label>Accent Color <span id="brand-accent-hex" style="font-family:monospace;font-weight:400;font-size:.8rem"></span></label>
+              <input type="color" id="brand-accent" style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;padding:3px">
+            </div>
+            <div class="field">
+              <label>Page Background <span id="brand-bg-hex" style="font-family:monospace;font-weight:400;font-size:.8rem"></span></label>
+              <input type="color" id="brand-bg" value="#faf8f5" style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;padding:3px">
+            </div>
+          </div>
+          <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto" onclick="saveBranding()">Save Branding</button>
+            <button class="btn-outline" onclick="resetBranding()">Reset to Default</button>
+            <span id="branding-saved" style="font-size:.82rem;color:var(--success);display:none">✓ Saved!</span>
+          </div>
+        </div>
+
+        <!-- Landing Page panel -->
+        <div class="settings-panel" id="spanel-landing">
+          <h3>Landing Page</h3>
+          <p class="panel-sub">Configure what customers see on the store's landing page (<code>landing.html</code>) — promos, news, and about.</p>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🎉 Promo Banner</div>
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+            <input type="checkbox" id="land-promo-active" style="width:16px;height:16px;accent-color:var(--primary)">
+            <label for="land-promo-active" style="font-size:.85rem;cursor:pointer">Show promo banner on landing page</label>
+          </div>
+          <div class="field" style="margin-bottom:.55rem">
+            <label>Promo Title</label>
+            <input type="text" id="land-promo-title" placeholder="e.g. Weekend Special — 20% off all cakes!">
+          </div>
+          <div class="field" style="margin-bottom:.9rem">
+            <label>Promo Details</label>
+            <textarea id="land-promo-body" rows="2" placeholder="More details about the promo…" style="resize:vertical"></textarea>
+          </div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🆕 What's New</div>
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+            <input type="checkbox" id="land-news-active" style="width:16px;height:16px;accent-color:var(--primary)">
+            <label for="land-news-active" style="font-size:.85rem;cursor:pointer">Show What's New card on landing page</label>
+          </div>
+          <div class="field" style="margin-bottom:.55rem">
+            <label>Headline</label>
+            <input type="text" id="land-news-title" placeholder="e.g. Try our new Ube Croissant!">
+          </div>
+          <div class="field" style="margin-bottom:.9rem">
+            <label>Details</label>
+            <textarea id="land-news-body" rows="2" placeholder="A short description…" style="resize:vertical"></textarea>
+          </div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🏠 About the Store</div>
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+            <input type="checkbox" id="land-about-active" style="width:16px;height:16px;accent-color:var(--primary)">
+            <label for="land-about-active" style="font-size:.85rem;cursor:pointer">Show About section on landing page</label>
+          </div>
+          <div class="field" style="margin-bottom:.9rem">
+            <label>About Text</label>
+            <textarea id="land-about-text" rows="3" placeholder="Tell your story — who you are, what you bake, why customers love you…" style="resize:vertical"></textarea>
+          </div>
+          <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto" onclick="saveLandingSettings()">Save Landing Page</button>
+            <span id="land-saved" style="font-size:.82rem;color:var(--success);display:none">✓ Saved!</span>
+            <a href="landing.html" target="_blank" class="btn-outline btn-sm" style="text-decoration:none">Preview ↗</a>
+          </div>
+        </div>
+
+        <!-- Payment panel -->
+        <div class="settings-panel" id="spanel-payment">
+          <h3>Payment Settings</h3>
+          <p class="panel-sub">Configure the payment options shown to customers on the order form. Leave blank to hide that option.</p>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🏦 Bank Transfer</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1rem">
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">Bank Name</label>
+              <input type="text" id="pay-bank-name" placeholder="e.g. BDO, BPI, Metrobank">
+            </div>
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">Account Number</label>
+              <input type="text" id="pay-bank-acct" placeholder="1234567890">
+            </div>
+            <div class="field" style="margin:0;grid-column:1/-1">
+              <label style="font-size:.77rem">Account Name</label>
+              <input type="text" id="pay-bank-acct-name" placeholder="Juan dela Cruz">
+            </div>
+          </div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">📱 E-Wallet / QR Code (GCash, Maya, etc.)</div>
+          <div style="display:grid;grid-template-columns:1fr;gap:.65rem;margin-bottom:1rem">
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">Label (shown to customers)</label>
+              <input type="text" id="pay-qr-label" placeholder="e.g. GCash — Juan dela Cruz — 09XX XXX XXXX">
+            </div>
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">QR Code Image</label>
+              <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
+                <input type="text" id="pay-qr-image" placeholder="https://… paste image URL" style="flex:1;min-width:0">
+                <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">or</span>
+                <button type="button" class="btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('qr-file-upload').click()">⬆ Upload</button>
+                <input type="file" id="qr-file-upload" accept="image/*" style="display:none">
+              </div>
+              <span style="font-size:.72rem;color:var(--muted);display:block">Upload your GCash / Maya / PayMaya QR from your device, or paste a hosted image link.</span>
+            </div>
+            <div id="pay-qr-preview" style="display:none;text-align:center">
+              <img id="pay-qr-img-preview" src="" alt="QR Preview" style="max-width:180px;border-radius:8px;border:1px solid var(--border)">
+              <div style="margin-top:.4rem">
+                <button type="button" class="btn-outline btn-sm" style="font-size:.72rem;color:var(--danger);border-color:var(--danger)" onclick="clearQrImage()">✕ Remove</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">💬 Contact / Messenger</div>
+          <div style="display:grid;grid-template-columns:1fr;gap:.65rem;margin-bottom:1rem">
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">Facebook Messenger Link <span style="font-weight:400;color:var(--muted)">(optional — shown to customers for payment questions)</span></label>
+              <input type="url" id="pay-messenger" placeholder="https://m.me/YourPageName">
+            </div>
+            <div class="field" style="margin:0">
+              <label style="font-size:.77rem">Contact Label <span style="font-weight:400;color:var(--muted)">(e.g. "Message us on Messenger")</span></label>
+              <input type="text" id="pay-contact-label" placeholder="Message us on Messenger">
+            </div>
+          </div>
+          <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto" onclick="savePaymentSettings()">Save Payment Settings</button>
+            <span id="pay-saved" style="font-size:.82rem;color:var(--success);display:none">✓ Saved!</span>
+          </div>
+        </div>
+
+        <!-- Integration panel -->
+        <div class="settings-panel" id="spanel-integration">
+          <h3>Integration</h3>
+          <p class="panel-sub">Paste the Web App URL from your Google Apps Script deployment. This connects the order form and admin panel to your Google Sheet.</p>
+          <div class="url-row">
+            <input type="url" id="settings-url" placeholder="https://script.google.com/macros/s/…/exec">
+            <button class="btn-outline btn-sm" onclick="testConnection()">Test</button>
+            <button class="btn-primary btn-sm" style="width:auto" onclick="saveUrl()">Save</button>
+          </div>
+          <div id="conn-status" class="conn-status conn-wait" style="display:none"></div>
+        </div>
+
+        <!-- Security panel -->
+        <div class="settings-panel" id="spanel-security">
+          <h3>Security</h3>
+          <p class="panel-sub">Default PIN is <strong>1234</strong> — change it to something only your staff knows.</p>
+          <div class="field" style="margin-bottom:.75rem">
+            <label>Current PIN</label>
+            <input type="password" id="pin-current" placeholder="Enter current PIN" maxlength="20">
+          </div>
+          <div class="fields-row" style="margin-bottom:1rem">
+            <div class="field">
+              <label>New PIN</label>
+              <input type="password" id="pin-new" placeholder="New PIN (min 4 chars)" maxlength="20">
+            </div>
+            <div class="field">
+              <label>Confirm New PIN</label>
+              <input type="password" id="pin-confirm" placeholder="Repeat new PIN" maxlength="20">
+            </div>
+          </div>
+          <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto" onclick="changePin()">Change PIN</button>
+            <span id="pin-saved" style="font-size:.82rem;color:var(--success);display:none">✓ PIN changed!</span>
+          </div>
+        </div>
+
+      </div><!-- /.settings-content -->
+    </div><!-- /.settings-layout -->
+  </div><!-- /#tab-settings -->
+
+  </div><!-- /.admin-main -->
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+</div><!-- /.admin-body -->
+
+<!-- Add / Edit item modal -->
+<div class="item-modal-overlay" id="item-modal" style="display:none">
+  <div class="item-modal">
+    <h3 id="modal-title">Add Item</h3>
+    <div class="field"><label>Name *</label><input type="text" id="item-name" placeholder="e.g. Chocolate Cake (slice)"></div>
+    <div class="field"><label>Category *</label><input type="text" id="item-cat" placeholder="e.g. Cakes" list="cat-suggestions"><datalist id="cat-suggestions"></datalist></div>
+    <div class="field"><label>Price (₱) *</label><input type="number" id="item-price" placeholder="0" min="0" step="1"></div>
+    <div class="field"><label>Description</label><input type="text" id="item-desc" placeholder="Short description shown to customers"></div>
+    <div class="field">
+      <label>Photo URL</label>
+      <input type="url" id="item-img" placeholder="Paste Google Drive or image link here">
+      <span style="font-size:.72rem;color:var(--muted);margin-top:.25rem;display:block">
+        Google Drive: right-click photo → Share → Anyone with link → Copy link, then paste here.
+      </span>
+      <div id="item-img-preview" style="margin-top:.5rem;display:none">
+        <img id="item-img-thumb" style="width:100%;max-height:140px;object-fit:cover;border-radius:7px;border:1.5px solid var(--border)">
+      </div>
+    </div>
+    <input type="hidden" id="item-id">
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeItemModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto" id="item-save-btn" onclick="saveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment confirmation modal -->
+<div id="pay-confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(60,42,30,.55);z-index:300;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeConfirmModal()">
+  <div style="background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);max-width:400px;width:100%;padding:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <h3 style="font-size:1rem;font-weight:700;color:var(--primary)">🔍 Verify Payment</h3>
+      <button onclick="closeConfirmModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--muted);padding:0;line-height:1">✕</button>
+    </div>
+    <div id="pcd-order-info" style="background:var(--bg);border-radius:8px;padding:.75rem .9rem;margin-bottom:.85rem;font-size:.87rem"></div>
+    <div id="pcd-ref-block" style="display:none;background:#fffbeb;border:2px solid #f59e0b;border-radius:8px;padding:.65rem .9rem;margin-bottom:.85rem;text-align:center">
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#92400e;margin-bottom:.3rem">Reference Number</div>
+      <div id="pcd-ref" style="font-size:1.1rem;font-weight:800;font-family:monospace;color:#92400e;letter-spacing:.05em;word-break:break-all"></div>
+    </div>
+    <div style="background:#fef3c7;border-radius:8px;padding:.6rem .85rem;font-size:.8rem;color:#92400e;margin-bottom:1.1rem;display:flex;gap:.5rem;align-items:flex-start">
+      <span style="flex-shrink:0;font-size:1rem">⚠</span>
+      <span>Check your bank or e-wallet account to confirm this payment was received <strong>before</strong> clicking confirm.</span>
+    </div>
+    <div style="display:flex;gap:.65rem">
+      <button class="btn-primary" style="flex:1;background:#16a34a;font-size:.88rem" onclick="doConfirmPayment()">✓ Payment Received</button>
+      <button class="btn-outline" style="flex:1;color:var(--danger);border-color:var(--danger);font-size:.88rem" onclick="doRejectPayment()">✗ Not Found — Reject</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Resolve URL: localStorage overrides config.js ─────────
+var PLACEHOLDER = 'PASTE_YOUR_SCRIPT_URL_HERE'
+var ACTIVE_URL  = localStorage.getItem('scb_script_url') || SCRIPT_URL
+
+function isConfigured() {
+  return ACTIVE_URL && ACTIVE_URL !== PLACEHOLDER
+}
+
+// ── Settings ───────────────────────────────────────────────
+function saveUrl() {
+  var val = document.getElementById('settings-url').value.trim()
+  if (!val || !val.startsWith('http')) { alert('Please enter a valid URL.'); return }
+  ACTIVE_URL = val
+  localStorage.setItem('scb_script_url', val)
+  document.getElementById('setup-banner').style.display = 'none'
+  showConnStatus('conn-wait', '✓ Saved — testing connection…')
+  testConnection()
+}
+
+function testConnection() {
+  var url = document.getElementById('settings-url').value.trim() || ACTIVE_URL
+  showConnStatus('conn-wait', 'Testing…')
+  fetch(url)
+    .then(function(r) { return r.json() })
+    .then(function(data) {
+      if (Array.isArray(data.orders) || Array.isArray(data.items)) {
+        showConnStatus('conn-ok', '✓ Connected successfully!')
+      } else {
+        showConnStatus('conn-fail', '✗ Connected but response looks unexpected.')
+      }
+    })
+    .catch(function() { showConnStatus('conn-fail', '✗ Could not connect. Check the URL and try again.') })
+}
+
+function showConnStatus(cls, msg) {
+  var el = document.getElementById('conn-status')
+  el.className = 'conn-status ' + cls
+  el.textContent = msg
+  el.style.display = 'inline-block'
+}
+
+var TAB_LABELS = { orders: 'Orders', menu: 'Menu', settings: 'Settings' }
+
+function switchTab(name) {
+  document.querySelectorAll('.page-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.tab === name)
+  })
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active') })
+  document.getElementById('tab-' + name).classList.add('active')
+  if (name === 'menu') renderMenuTab()
+  if (name === 'settings') {
+    document.getElementById('settings-url').value = ACTIVE_URL !== PLACEHOLDER ? ACTIVE_URL : ''
+  }
+  updateDocTitle((TAB_LABELS[name] || name) + ' — Admin')
+  sessionStorage.setItem('scb_active_tab', name)
+}
+
+var activeFilter = 'all'
+var searchQuery  = ''
+var allOrders    = []
+var _knownIds    = null   // null = first load (seed only, no notification)
+var _newIds      = {}     // orders that arrived after page load — cleared when admin opens the card
+var _hasFresh    = false  // true when silentRefresh found new orders
+var _pollTimer   = null
+var _lastFetch   = 0
+var POLL_MS      = 30000  // 30-second poll interval
+
+// ── Fetch orders ───────────────────────────────────────────
+function fetchOrders(callback) {
+  fetch(ACTIVE_URL)
+    .then(function(r) { return r.json() })
+    .then(function(data) {
+      var orders = (data.orders || []).sort(function(a,b){ return b.timestamp - a.timestamp })
+      // Detect new arrivals (skip on very first load)
+      if (_knownIds === null) {
+        _knownIds = {}
+        orders.forEach(function(o){ _knownIds[o.id] = true })
+      } else {
+        var fresh = orders.filter(function(o){ return !_knownIds[o.id] })
+        fresh.forEach(function(o){ _knownIds[o.id] = true; _newIds[o.id] = true })
+        if (fresh.length) {
+          _hasFresh = true
+          showToast('🛎 ' + fresh.length + ' new order' + (fresh.length > 1 ? 's' : '') + ' received!', 'ok')
+        }
+      }
+      allOrders = orders
+      _lastFetch = Date.now()
+      updateLiveIndicator()
+      callback(null)
+    })
+    .catch(function(err) { callback(err) })
+}
+
+// ── Silent background refresh — stats only, order list stays put ───
+function silentRefresh() {
+  if (!isConfigured()) return
+  fetchOrders(function(err) {
+    if (err) return
+    renderStats()
+    if (_hasFresh) {
+      _hasFresh = false
+      renderOrders()   // re-render only when new orders arrived so admin sees highlights
+    }
+  })
+}
+
+// ── Polling control ────────────────────────────────────────
+function startPolling() {
+  stopPolling()
+  if (!isConfigured()) return
+  _pollTimer = setInterval(silentRefresh, POLL_MS)
+}
+function stopPolling() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null }
+}
+
+// Pause poll when tab is hidden; resume + immediate fetch when visible again
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    stopPolling()
+  } else {
+    silentRefresh()
+    startPolling()
+  }
+})
+
+// ── Live indicator ─────────────────────────────────────────
+function updateLiveIndicator() {
+  var el = document.getElementById('live-indicator')
+  if (el) el.style.display = 'inline-flex'
+  setLiveLabel()
+}
+function setLiveLabel() {
+  var el = document.getElementById('live-label')
+  if (!el || !_lastFetch) return
+  var secs = Math.floor((Date.now() - _lastFetch) / 1000)
+  el.textContent = secs < 10 ? 'Just updated'
+    : secs < 60  ? secs + 's ago'
+    : Math.floor(secs / 60) + 'm ago'
+}
+setInterval(setLiveLabel, 10000)
+
+// ── Status update (optimistic UI + background POST) ────────
+function updateStatus(orderId, newStatus) {
+  var o = allOrders.find(function(x) { return x.id === orderId })
+  if (o) { o.status = newStatus }
+  renderStats()
+  renderOrders()
+  fetch(ACTIVE_URL, {
+    method: 'POST', mode: 'no-cors',
+    body: JSON.stringify({ action: 'updateStatus', id: orderId, status: newStatus })
+  })
+}
+
+// ── Delete order (optimistic UI + background POST) ─────────
+function deleteOrder(orderId) {
+  if (!confirm('Delete order ' + orderId + '? This cannot be undone.')) return
+  allOrders = allOrders.filter(function(o) { return o.id !== orderId })
+  renderStats()
+  renderOrders()
+  fetch(ACTIVE_URL, {
+    method: 'POST', mode: 'no-cors',
+    body: JSON.stringify({ action: 'deleteOrder', id: orderId })
+  })
+}
+
+// ── Toggle card expand ─────────────────────────────────────
+function toggleCard(id) {
+  var el = document.getElementById('ocard-' + id)
+  if (!el) return
+  el.classList.toggle('open')
+  // Clear the "new" highlight once the admin opens the card
+  if (el.classList.contains('open') && el.classList.contains('new-order-card')) {
+    el.classList.remove('new-order-card')
+    delete _newIds[id]
+  }
+}
+
+// ── Stats (uses cached allOrders) ──────────────────────────
+function renderStats() {
+  var today = new Date().toISOString().split('T')[0]
+
+  var todayOrders  = allOrders.filter(function(o) { return o.date === today })
+  var unconfirmed  = allOrders.filter(function(o) { return o.status === 'awaiting_confirmation' })
+  var pending      = allOrders.filter(function(o) { return o.status === 'pending' })
+  var ready        = allOrders.filter(function(o) { return o.status === 'ready' })
+  var complete     = allOrders.filter(function(o) { return o.status === 'complete' })
+
+  var todayValue   = todayOrders.reduce(function(s,o){ return s + (parseFloat(o.total)||0) }, 0)
+  var unconfAmt    = unconfirmed.reduce(function(s,o){ return s + (parseFloat(o.total)||0) }, 0)
+  var pendPickup   = pending.filter(function(o){ return o.type === 'pickup' }).length
+  var pendDeliv    = pending.filter(function(o){ return o.type === 'delivery' }).length
+  var readyPickup  = ready.filter(function(o){ return o.type === 'pickup' }).length
+  var readyDeliv   = ready.filter(function(o){ return o.type === 'delivery' }).length
+  var totalRevenue = complete.reduce(function(s,o){ return s + (parseFloat(o.total)||0) }, 0)
+  var todayRevenue = complete.filter(function(o){ return o.date === today })
+                             .reduce(function(s,o){ return s + (parseFloat(o.total)||0) }, 0)
+
+  function peso(n) {
+    if (n >= 100000) return '₱' + (n/1000).toFixed(1).replace(/\.0$/, '') + 'k'
+    return '₱' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  document.getElementById('stat-today').textContent         = todayOrders.length
+  document.getElementById('stat-today-sub').textContent     = peso(todayValue) + ' total value'
+  document.getElementById('stat-unconfirmed').textContent   = unconfirmed.length
+  document.getElementById('stat-unconfirmed-sub').textContent = peso(unconfAmt) + ' awaiting'
+  document.getElementById('stat-pending').textContent       = pending.length
+  document.getElementById('stat-pending-sub').textContent   = pendPickup + ' pickup · ' + pendDeliv + ' delivery'
+  document.getElementById('stat-ready').textContent         = ready.length
+  document.getElementById('stat-ready-sub').textContent     = readyPickup + ' pickup · ' + readyDeliv + ' delivery'
+  document.getElementById('stat-revenue').textContent       = peso(totalRevenue)
+  document.getElementById('stat-revenue-sub').textContent   = peso(todayRevenue) + ' today'
+
+  // Urgent highlight for unconfirmed payments
+  var card = document.getElementById('stat-unconfirmed-card')
+  card.style.borderColor = unconfirmed.length > 0 ? '#f59e0b' : ''
+  card.style.background  = unconfirmed.length > 0 ? '#fffbeb' : ''
+  var badge = document.getElementById('payments-badge')
+  badge.textContent = unconfirmed.length
+  badge.style.display = unconfirmed.length > 0 ? '' : 'none'
+}
+
+// ── Status action buttons per order ───────────────────────
+function statusButtons(order) {
+  var id = safeId(order.id); var s = order.status
+  if (s === 'awaiting_confirmation') return (
+    '<button class="btn-primary btn-sm" style="width:auto;background:#d97706" onclick="openConfirmModal(\'' + id + '\')">🔍 Review Payment</button>'
+  )
+  if (s === 'pending') return (
+    '<button class="btn-primary btn-sm" style="width:auto" onclick="updateStatus(\'' + id + '\',\'ready\')">Mark Ready</button>' +
+    '<button class="btn-outline btn-sm" onclick="updateStatus(\'' + id + '\',\'cancelled\')">Cancel</button>'
+  )
+  if (s === 'ready') return (
+    '<button class="btn-primary btn-sm" style="width:auto;background:var(--success)" onclick="updateStatus(\'' + id + '\',\'complete\')">Mark Complete</button>' +
+    '<button class="btn-outline btn-sm" onclick="updateStatus(\'' + id + '\',\'pending\')">Back to Pending</button>'
+  )
+  if (s === 'complete') return (
+    '<button class="btn-outline btn-sm" onclick="updateStatus(\'' + id + '\',\'pending\')">Reopen</button>'
+  )
+  if (s === 'cancelled') return (
+    '<button class="btn-outline btn-sm" onclick="updateStatus(\'' + id + '\',\'pending\')">Restore</button>'
+  )
+  return ''
+}
+
+// ── Payment confirmation modal ─────────────────────────────
+var pendingConfirmId = null
+
+function openConfirmModal(orderId) {
+  var o = allOrders.find(function(x) { return x.id === orderId })
+  if (!o) return
+  pendingConfirmId = orderId
+
+  var method = o.paymentMethod === 'bank' ? '🏦 Bank Transfer'
+             : o.paymentMethod === 'qr'   ? '📱 E-Wallet / QR'
+             : '💵 Cash'
+
+  document.getElementById('pcd-order-info').innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.35rem">' +
+      '<span style="font-family:monospace;font-size:.85rem;font-weight:700;color:var(--primary)">' + escHtml(o.id) + '</span>' +
+      '<span style="font-size:1.05rem;font-weight:800">₱' + parseFloat(o.total).toFixed(2) + '</span>' +
+    '</div>' +
+    '<div style="font-size:.82rem;color:var(--muted)">' + escHtml(o.customer.name) + ' &nbsp;·&nbsp; ' + method + '</div>'
+
+  var refBlock = document.getElementById('pcd-ref-block')
+  if (o.paymentRef) {
+    document.getElementById('pcd-ref').textContent = o.paymentRef
+    refBlock.style.display = 'block'
+  } else {
+    refBlock.style.display = 'none'
+  }
+
+  var overlay = document.getElementById('pay-confirm-overlay')
+  overlay.style.display = 'flex'
+}
+
+function closeConfirmModal() {
+  document.getElementById('pay-confirm-overlay').style.display = 'none'
+  pendingConfirmId = null
+}
+
+function doConfirmPayment() {
+  if (!pendingConfirmId) return
+  var id = pendingConfirmId
+  closeConfirmModal()
+  updateStatus(id, 'pending')
+  showToast('✓ Payment confirmed — order moved to Pending', 'ok')
+}
+
+function doRejectPayment() {
+  if (!pendingConfirmId) return
+  var id = pendingConfirmId
+  closeConfirmModal()
+  updateStatus(id, 'cancelled')
+  showToast('Payment rejected — order cancelled', 'err')
+}
+
+function statusLabel(s) {
+  if (s === 'awaiting_confirmation') return '⏳ Awaiting Payment'
+  if (s === 'pending')   return 'Pending'
+  if (s === 'ready')     return 'Ready'
+  if (s === 'complete')  return 'Complete'
+  if (s === 'cancelled') return 'Cancelled'
+  return s
+}
+
+// ── Date / timestamp helpers ───────────────────────────────
+function fmtDate(d) {
+  var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]
+}
+
+function fmtTs(ts) {
+  var d = new Date(ts)
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// ── Orders list (uses cached allOrders) ───────────────────
+function renderOrders() {
+  var filtered = activeFilter === 'all'
+    ? allOrders
+    : allOrders.filter(function(o) { return o.status === activeFilter })
+
+  if (searchQuery) {
+    var q = searchQuery.toLowerCase()
+    filtered = filtered.filter(function(o) {
+      return o.id.toLowerCase().includes(q) ||
+             o.customer.name.toLowerCase().includes(q) ||
+             o.customer.phone.toLowerCase().includes(q)
+    })
+  }
+
+  filtered.sort(function(a, b) {
+    // Unconfirmed payments always surface first — they need the owner's attention
+    var aU = a.status === 'awaiting_confirmation' ? 0 : 1
+    var bU = b.status === 'awaiting_confirmation' ? 0 : 1
+    if (aU !== bU) return aU - bU
+    return b.timestamp - a.timestamp
+  })
+
+  var listEl = document.getElementById('order-list')
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No orders found.</p></div>'
+    return
+  }
+
+  listEl.innerHTML = filtered.map(function(o) {
+    var sid = safeId(o.id)
+
+    var itemRows = o.items.map(function(i) {
+      return '<tr>' +
+        '<td>' + escHtml(i.name) + '</td>' +
+        '<td>' + parseInt(i.qty, 10) + '</td>' +
+        '<td>₱' + parseFloat(i.price).toFixed(2) + '</td>' +
+        '<td>₱' + (parseFloat(i.price) * parseInt(i.qty, 10)).toFixed(2) + '</td>' +
+      '</tr>'
+    }).join('')
+
+    var emailRow  = o.customer.email ? '<div class="detail-group"><label>Email</label><span>' + escHtml(o.customer.email) + '</span></div>' : ''
+    var addrRow   = o.address        ? '<div class="detail-group"><label>Address</label><span>' + escHtml(o.address) + '</span></div>' : ''
+    var notesHtml = o.notes          ? '<p class="notes-block"><strong>Notes:</strong> ' + escHtml(o.notes) + '</p>' : ''
+
+    var payBadge = ''
+    if (o.paymentMethod === 'bank') payBadge = '<span style="font-size:.72rem;background:#e0f2fe;color:#0369a1;border-radius:99px;padding:.1rem .45rem;font-weight:700;margin-left:.3rem">🏦 Bank</span>'
+    if (o.paymentMethod === 'qr')   payBadge = '<span style="font-size:.72rem;background:#f0fdf4;color:#166534;border-radius:99px;padding:.1rem .45rem;font-weight:700;margin-left:.3rem">📱 E-Wallet</span>'
+    // For unconfirmed orders, show the ref# right in the header so owner sees it immediately
+    var refInHeader = (o.status === 'awaiting_confirmation' && o.paymentRef)
+      ? '<span style="font-size:.72rem;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:6px;padding:.1rem .45rem;font-weight:700;font-family:monospace;margin-left:.3rem">Ref: ' + escHtml(o.paymentRef) + '</span>'
+      : ''
+
+    return '<div class="order-card' + (_newIds[o.id] ? ' new-order-card' : '') + (o.status === 'awaiting_confirmation' ? ' unconfirmed-card' : '') + '" id="ocard-' + sid + '">' +
+      '<div class="order-card-header" onclick="toggleCard(\'' + sid + '\')">' +
+        '<span class="order-id">' + escHtml(o.id) + '</span>' +
+        '<span class="badge badge-' + escHtml(o.status) + '">' + statusLabel(o.status) + '</span>' +
+        payBadge +
+        refInHeader +
+        '<div class="order-meta">' +
+          '<strong>' + escHtml(o.customer.name) + '</strong> · ' +
+          (o.type === 'pickup' ? 'Pickup' : 'Delivery') + ' · ' +
+          escHtml(fmtDate(o.date)) + ' ' + escHtml(o.time) +
+        '</div>' +
+        '<div class="order-total">₱' + parseFloat(o.total).toFixed(2) + '</div>' +
+        '<span class="expand-icon">▶</span>' +
+      '</div>' +
+      '<div class="order-card-body">' +
+        '<div class="order-detail-grid">' +
+          '<div class="detail-group"><label>Customer</label><span>' + escHtml(o.customer.name) + '</span></div>' +
+          '<div class="detail-group"><label>Phone</label><span>' + escHtml(o.customer.phone) + '</span></div>' +
+          emailRow +
+          '<div class="detail-group"><label>Order type</label><span>' + (o.type === 'pickup' ? '🛍 Pickup' : '🚚 Delivery') + '</span></div>' +
+          '<div class="detail-group"><label>Date &amp; Time</label><span>' + escHtml(fmtDate(o.date)) + ' at ' + escHtml(o.time) + '</span></div>' +
+          addrRow +
+          '<div class="detail-group"><label>Ordered at</label><span>' + escHtml(fmtTs(o.timestamp)) + '</span></div>' +
+          '<div class="detail-group"><label>Payment</label><span>' +
+            (o.paymentMethod === 'cash' ? '💵 Cash' : o.paymentMethod === 'bank' ? '🏦 Bank Transfer' : o.paymentMethod === 'qr' ? '📱 E-Wallet' : '—') +
+            (o.paymentRef ? ' — Ref: <strong>' + escHtml(o.paymentRef) + '</strong>' : '') +
+          '</span></div>' +
+        '</div>' +
+        '<table class="items-table">' +
+          '<thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>' +
+          '<tbody>' + itemRows + '</tbody>' +
+          '<tfoot><tr><td colspan="3">Total</td><td>₱' + parseFloat(o.total).toFixed(2) + '</td></tr></tfoot>' +
+        '</table>' +
+        notesHtml +
+        '<div class="order-actions">' +
+          statusButtons(o) +
+          '<button class="btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger);margin-left:auto" onclick="deleteOrder(\'' + sid + '\')">Delete</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  }).join('')
+}
+
+// ── Full render: fetch then display ───────────────────────
+function render() {
+  document.getElementById('order-list').innerHTML =
+    '<div class="empty-state"><p>Loading orders…</p></div>'
+  fetchOrders(function(err) {
+    if (err) {
+      document.getElementById('order-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div>' +
+        '<p>Could not load orders. Check your internet connection or Script URL.</p></div>'
+      return
+    }
+    renderStats()
+    renderOrders()
+    startPolling()
+  })
+}
+
+// ── Filter tabs ────────────────────────────────────────────
+document.querySelectorAll('.filter-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() { setFilter(tab.dataset.filter) })
+})
+
+function setFilter(f) {
+  activeFilter = f
+  document.querySelectorAll('.filter-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.filter === activeFilter)
+  })
+  renderOrders()
+}
+
+document.getElementById('search').addEventListener('input', function(e) {
+  searchQuery = e.target.value
+  renderOrders()
+})
+
+document.getElementById('refresh-btn').addEventListener('click', function() {
+  var btn = this
+  btn.disabled = true
+  btn.textContent = '↻ Refreshing…'
+  fetchOrders(function(err) {
+    btn.disabled = false
+    btn.textContent = '↻ Refresh'
+    if (err) { showToast('Could not refresh — check connection.', 'err'); return }
+    renderStats()
+    renderOrders()
+  })
+})
+
+// ── Page tabs ──────────────────────────────────────────────
+document.querySelectorAll('.page-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() { switchTab(tab.dataset.tab) })
+})
+
+// ── Menu editor ────────────────────────────────────────────
+var menuItems = []
+
+var MENU_STORE = 'scb_menu'
+
+function fetchMenuItems(callback) {
+  try {
+    menuItems = JSON.parse(localStorage.getItem(MENU_STORE)) || []
+  } catch(e) {
+    menuItems = []
+  }
+  callback(null)
+}
+
+function persistMenu() {
+  localStorage.setItem(MENU_STORE, JSON.stringify(menuItems))
+}
+
+// Render menu table from the in-memory menuItems array (no fetch)
+function renderMenuItems() {
+  document.getElementById('menu-count').textContent = menuItems.length + ' item' + (menuItems.length !== 1 ? 's' : '')
+  if (menuItems.length === 0) {
+    document.getElementById('menu-list').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">🍰</div><p>No items yet — add your first one!</p></div>'
+    return
+  }
+  var rows = menuItems.map(function(it) {
+    var imgSrc = safeUrl(it.img)
+    var thumb  = imgSrc
+      ? '<img src="' + escHtml(imgSrc) + '" style="width:40px;height:40px;object-fit:cover;border-radius:5px;vertical-align:middle;margin-right:.5rem" onerror="this.style.display=\'none\'">'
+      : '<span style="width:40px;height:40px;background:var(--bg);border-radius:5px;display:inline-block;vertical-align:middle;margin-right:.5rem"></span>'
+    var iid = parseInt(it.id, 10)
+    return '<tr>' +
+      '<td>' + thumb + '<strong>' + escHtml(it.name) + '</strong></td>' +
+      '<td>' + escHtml(it.cat) + '</td>' +
+      '<td>₱' + parseFloat(it.price).toFixed(2) + '</td>' +
+      '<td style="color:var(--muted);font-size:.8rem">' + escHtml(it.desc || '—') + '</td>' +
+      '<td style="white-space:nowrap">' +
+        '<button class="btn-outline btn-sm" onclick="openItemModal(' + iid + ')" style="margin-right:.3rem">Edit</button>' +
+        '<button class="btn-outline btn-sm" onclick="confirmDeleteItem(' + iid + ')" style="color:var(--danger);border-color:var(--danger)">Delete</button>' +
+      '</td>' +
+    '</tr>'
+  }).join('')
+  document.getElementById('menu-list').innerHTML =
+    '<table class="menu-table">' +
+      '<thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Description</th><th></th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>'
+  var cats = menuItems.reduce(function(acc, i) { if (acc.indexOf(i.cat) === -1) acc.push(i.cat); return acc }, [])
+  // Use textContent via DOM to safely populate datalist options
+  var datalist = document.getElementById('cat-suggestions')
+  datalist.innerHTML = ''
+  cats.forEach(function(c) { var o = document.createElement('option'); o.value = c; datalist.appendChild(o) })
+}
+
+// Fetch from sheet then render
+function renderMenuTab() {
+  document.getElementById('menu-list').innerHTML = '<p class="empty-msg" style="padding:1rem">Loading…</p>'
+  fetchMenuItems(function(err) {
+    if (err) {
+      document.getElementById('menu-list').innerHTML = '<div class="empty-state"><p>Could not load menu.</p></div>'
+      return
+    }
+    renderMenuItems()
+  })
+}
+
+// Convert Google Drive share link → direct image URL
+function normalizeImgUrl(url) {
+  if (!url) return ''
+  var m = url.match(/\/file\/d\/([^/?#]+)/)
+  if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1]
+  var m2 = url.match(/[?&]id=([^&]+)/)
+  if (m2) return 'https://drive.google.com/uc?export=view&id=' + m2[1]
+  return url
+}
+
+function updateImgPreview(url) {
+  var norm = normalizeImgUrl(url)
+  var preview = document.getElementById('item-img-preview')
+  var thumb   = document.getElementById('item-img-thumb')
+  if (norm) {
+    thumb.src = norm
+    preview.style.display = 'block'
+    thumb.onerror = function() { preview.style.display = 'none' }
+  } else {
+    preview.style.display = 'none'
+  }
+}
+
+function openItemModal(id) {
+  document.getElementById('item-name').value  = ''
+  document.getElementById('item-cat').value   = ''
+  document.getElementById('item-price').value = ''
+  document.getElementById('item-desc').value  = ''
+  document.getElementById('item-img').value   = ''
+  document.getElementById('item-id').value    = ''
+  document.getElementById('item-img-preview').style.display = 'none'
+  document.getElementById('modal-title').textContent = 'Add Item'
+
+  if (id) {
+    var it = menuItems.find(function(x) { return x.id === id })
+    if (it) {
+      document.getElementById('item-name').value  = it.name
+      document.getElementById('item-cat').value   = it.cat
+      document.getElementById('item-price').value = it.price
+      document.getElementById('item-desc').value  = it.desc || ''
+      document.getElementById('item-img').value   = it.img  || ''
+      document.getElementById('item-id').value    = it.id
+      document.getElementById('modal-title').textContent = 'Edit Item'
+      updateImgPreview(it.img || '')
+    }
+  }
+  document.getElementById('item-modal').style.display = 'flex'
+}
+
+// Live photo preview while typing URL
+document.getElementById('item-img').addEventListener('input', function() {
+  updateImgPreview(this.value.trim())
+})
+
+function closeItemModal() {
+  document.getElementById('item-modal').style.display = 'none'
+}
+
+function saveItem() {
+  var name  = document.getElementById('item-name').value.trim()
+  var cat   = document.getElementById('item-cat').value.trim()
+  var price = parseFloat(document.getElementById('item-price').value)
+  var desc  = document.getElementById('item-desc').value.trim()
+  var id    = document.getElementById('item-id').value
+
+  if (!name)        { alert('Please enter a name.'); return }
+  if (!cat)         { alert('Please enter a category.'); return }
+  if (isNaN(price)) { alert('Please enter a valid price.'); return }
+
+  var img = normalizeImgUrl(document.getElementById('item-img').value.trim())
+
+  if (id) {
+    var idx = menuItems.findIndex(function(x) { return String(x.id) === String(id) })
+    if (idx !== -1) {
+      menuItems[idx] = { id: menuItems[idx].id, cat: cat, name: name, price: price, desc: desc, img: img }
+    }
+    showToast('✓ Item updated!', 'ok')
+  } else {
+    menuItems.push({ id: Date.now(), cat: cat, name: name, price: price, desc: desc, img: img })
+    showToast('✓ Item added!', 'ok')
+  }
+
+  persistMenu()
+  closeItemModal()
+  renderMenuItems()
+}
+
+function confirmDeleteItem(id) {
+  var it = menuItems.find(function(x) { return String(x.id) === String(id) })
+  if (!it) return
+  if (!confirm('Delete "' + it.name + '"? This cannot be undone.')) return
+  menuItems = menuItems.filter(function(x) { return String(x.id) !== String(id) })
+  persistMenu()
+  renderMenuItems()
+  showToast('Item deleted.', 'info')
+}
+
+function publishMenu() {
+  var payment  = {}
+  var branding = {}
+  var landing  = {}
+  try { payment  = JSON.parse(localStorage.getItem('scb_payment'))  || {} } catch(e) {}
+  try { branding = JSON.parse(localStorage.getItem('scb_branding')) || {} } catch(e) {}
+  try { landing  = JSON.parse(localStorage.getItem('scb_landing'))  || {} } catch(e) {}
+
+  var currentPinHash = localStorage.getItem('scb_admin_pin_hash') ||
+    (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH)
+  var content =
+    'var BUNDLED_MENU = ' + JSON.stringify(menuItems, null, 2) + ';\n' +
+    'var BUNDLED_PAYMENT = ' + JSON.stringify(payment, null, 2) + ';\n' +
+    'var BUNDLED_BRANDING = ' + JSON.stringify(branding, null, 2) + ';\n' +
+    'var BUNDLED_LANDING = ' + JSON.stringify(landing, null, 2) + ';\n' +
+    'var BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
+
+  var blob = new Blob([content], { type: 'text/javascript' })
+  var url  = URL.createObjectURL(blob)
+  var a    = document.createElement('a')
+  a.href = url; a.download = 'menu.js'; a.click()
+  URL.revokeObjectURL(url)
+  showToast('✓ menu.js downloaded — replace the file in your folder and redeploy to Netlify.', 'ok')
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast')
+  t.textContent = msg
+  t.className   = 'toast toast-' + (type || 'info')
+  t.classList.add('show')
+  clearTimeout(t._timer)
+  t._timer = setTimeout(function() { t.classList.remove('show') }, 3500)
+}
+
+// ── Branding ───────────────────────────────────────────────
+function loadBrandingForm() {
+  var b = getBranding()
+  document.getElementById('brand-name').value    = b.name    || ''
+  document.getElementById('brand-emoji').value   = b.emoji   || ''
+  document.getElementById('brand-tagline').value  = b.tagline !== undefined ? b.tagline : DEFAULT_BRANDING.tagline
+  document.getElementById('brand-banner-img').value = b.banner_img || ''
+  document.getElementById('brand-primary').value = b.primary || '#7b4a2c'
+  document.getElementById('brand-accent').value  = b.accent  || '#c97d47'
+  document.getElementById('brand-bg').value      = b.bg_color || '#faf8f5'
+  document.getElementById('brand-primary-hex').textContent = b.primary  || '#7b4a2c'
+  document.getElementById('brand-accent-hex').textContent  = b.accent   || '#c97d47'
+  document.getElementById('brand-bg-hex').textContent      = b.bg_color || '#faf8f5'
+  updateBannerPreview()
+}
+
+function updateBannerPreview() {
+  var url  = safeUrl(document.getElementById('brand-banner-img').value.trim())
+  var wrap = document.getElementById('banner-preview-wrap')
+  var img  = document.getElementById('banner-preview-img')
+  var clearBtn = document.getElementById('banner-clear-btn')
+  if (url) {
+    img.src = url
+    wrap.style.display = 'block'
+    clearBtn.style.display = 'inline'
+  } else {
+    img.src = ''
+    wrap.style.display = 'none'
+    clearBtn.style.display = 'none'
+  }
+}
+
+function clearBannerImg() {
+  document.getElementById('brand-banner-img').value = ''
+  document.getElementById('banner-upload-input').value = ''
+  updateBannerPreview()
+}
+
+document.getElementById('brand-banner-img').addEventListener('input', updateBannerPreview)
+
+document.getElementById('banner-upload-input').addEventListener('change', function(e) {
+  var file = e.target.files[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) { showToast('Please select an image file.', 'err'); return }
+  if (file.size > 2 * 1024 * 1024) { showToast('Image too large — please use a file under 2 MB.', 'err'); return }
+  var reader = new FileReader()
+  reader.onload = function(ev) {
+    document.getElementById('brand-banner-img').value = ev.target.result
+    updateBannerPreview()
+    showToast('✓ Background image uploaded — click Save to apply', 'ok')
+  }
+  reader.readAsDataURL(file)
+})
+
+function saveBranding() {
+  var b = {
+    name:       document.getElementById('brand-name').value.trim()  || 'My Bakery',
+    emoji:      document.getElementById('brand-emoji').value.trim(),
+    tagline:    document.getElementById('brand-tagline').value.trim(),
+    banner_img: document.getElementById('brand-banner-img').value.trim(),
+    primary:    document.getElementById('brand-primary').value,
+    accent:     document.getElementById('brand-accent').value,
+    bg_color:   document.getElementById('brand-bg').value
+  }
+  localStorage.setItem('scb_branding', JSON.stringify(b))
+  applyBranding()
+  var el = document.getElementById('branding-saved')
+  el.style.display = 'inline'
+  setTimeout(function(){ el.style.display = 'none' }, 2000)
+}
+
+function resetBranding() {
+  if (!confirm('Reset to default branding?')) return
+  localStorage.removeItem('scb_branding')
+  applyBranding()
+  loadBrandingForm()
+}
+
+// Live preview while editing
+document.getElementById('brand-name').addEventListener('input', function() {
+  document.querySelectorAll('.brand-name').forEach(function(el){ el.textContent = this.value || 'My Bakery' }.bind(this))
+})
+document.getElementById('brand-emoji').addEventListener('input', function() {
+  document.querySelectorAll('.brand-emoji').forEach(function(el){ el.textContent = this.value }.bind(this))
+})
+document.getElementById('brand-primary').addEventListener('input', function() {
+  document.getElementById('brand-primary-hex').textContent = this.value
+  document.documentElement.style.setProperty('--primary',    this.value)
+  document.documentElement.style.setProperty('--primary-h',  shade(this.value, 0.15))
+  document.documentElement.style.setProperty('--primary-lt', tint(this.value, 0.88))
+})
+document.getElementById('brand-accent').addEventListener('input', function() {
+  document.getElementById('brand-accent-hex').textContent = this.value
+  document.documentElement.style.setProperty('--accent', this.value)
+})
+document.getElementById('brand-bg').addEventListener('input', function() {
+  document.getElementById('brand-bg-hex').textContent = this.value
+  document.documentElement.style.setProperty('--bg', this.value)
+})
+
+// ── Payment settings ───────────────────────────────────────
+function loadPaymentForm() {
+  try {
+    var s = JSON.parse(localStorage.getItem('scb_payment')) || {}
+    document.getElementById('pay-bank-name').value      = s.bank_name      || ''
+    document.getElementById('pay-bank-acct').value      = s.bank_acct      || ''
+    document.getElementById('pay-bank-acct-name').value = s.bank_acct_name || ''
+    document.getElementById('pay-qr-label').value       = s.qr_label       || ''
+    document.getElementById('pay-qr-image').value       = s.qr_image       || ''
+    document.getElementById('pay-messenger').value      = s.messenger       || ''
+    document.getElementById('pay-contact-label').value  = s.contact_label  || ''
+    updateQrPreview()
+  } catch(e) {}
+}
+
+function updateQrPreview() {
+  var url  = safeUrl(document.getElementById('pay-qr-image').value.trim())
+  var wrap = document.getElementById('pay-qr-preview')
+  var img  = document.getElementById('pay-qr-img-preview')
+  if (url) { img.src = url; wrap.style.display = 'block' } else { img.src = ''; wrap.style.display = 'none' }
+}
+
+function clearQrImage() {
+  document.getElementById('pay-qr-image').value = ''
+  document.getElementById('qr-file-upload').value = ''
+  updateQrPreview()
+}
+
+document.getElementById('pay-qr-image').addEventListener('input', updateQrPreview)
+
+document.getElementById('qr-file-upload').addEventListener('change', function(e) {
+  var file = e.target.files[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) { showToast('Please select an image file.', 'err'); return }
+  if (file.size > 2 * 1024 * 1024) { showToast('Image is too large — please use a file under 2 MB.', 'err'); return }
+  var reader = new FileReader()
+  reader.onload = function(ev) {
+    document.getElementById('pay-qr-image').value = ev.target.result
+    updateQrPreview()
+    showToast('✓ QR image uploaded — click Save to apply', 'ok')
+  }
+  reader.readAsDataURL(file)
+})
+
+function savePaymentSettings() {
+  var settings = {
+    bank_name:      document.getElementById('pay-bank-name').value.trim(),
+    bank_acct:      document.getElementById('pay-bank-acct').value.trim(),
+    bank_acct_name: document.getElementById('pay-bank-acct-name').value.trim(),
+    qr_label:       document.getElementById('pay-qr-label').value.trim(),
+    qr_image:       document.getElementById('pay-qr-image').value.trim(),
+    messenger:      document.getElementById('pay-messenger').value.trim(),
+    contact_label:  document.getElementById('pay-contact-label').value.trim()
+  }
+  localStorage.setItem('scb_payment', JSON.stringify(settings))
+  var el = document.getElementById('pay-saved')
+  el.style.display = 'inline'
+  setTimeout(function() { el.style.display = 'none' }, 2500)
+  showToast('Payment settings saved!', 'ok')
+}
+
+function loadLandingForm() {
+  try { var s = JSON.parse(localStorage.getItem('scb_landing')) || {} } catch(e) { var s = {} }
+  document.getElementById('land-promo-active').checked  = !!s.promo_active
+  document.getElementById('land-promo-title').value     = s.promo_title  || ''
+  document.getElementById('land-promo-body').value      = s.promo_body   || ''
+  document.getElementById('land-news-active').checked   = !!s.news_active
+  document.getElementById('land-news-title').value      = s.news_title   || ''
+  document.getElementById('land-news-body').value       = s.news_body    || ''
+  document.getElementById('land-about-active').checked  = !!s.about_active
+  document.getElementById('land-about-text').value      = s.about_text   || ''
+}
+
+function saveLandingSettings() {
+  var s = {
+    promo_active: document.getElementById('land-promo-active').checked,
+    promo_title:  document.getElementById('land-promo-title').value.trim(),
+    promo_body:   document.getElementById('land-promo-body').value.trim(),
+    news_active:  document.getElementById('land-news-active').checked,
+    news_title:   document.getElementById('land-news-title').value.trim(),
+    news_body:    document.getElementById('land-news-body').value.trim(),
+    about_active: document.getElementById('land-about-active').checked,
+    about_text:   document.getElementById('land-about-text').value.trim()
+  }
+  localStorage.setItem('scb_landing', JSON.stringify(s))
+  var el = document.getElementById('land-saved')
+  el.style.display = 'inline'
+  setTimeout(function() { el.style.display = 'none' }, 2500)
+  showToast('Landing page saved!', 'ok')
+}
+
+// Update switchTab to load branding, payment, and landing forms
+function switchSettingsPanel(name) {
+  document.querySelectorAll('.settings-nav-item').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.spanel === name)
+  })
+  document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active') })
+  var panel = document.getElementById('spanel-' + name)
+  if (panel) panel.classList.add('active')
+  sessionStorage.setItem('scb_active_spanel', name)
+  // Reset inner scroll and center the layout in the viewport
+  var content = document.querySelector('.settings-content')
+  if (content) content.scrollTop = 0
+  var layout = document.querySelector('.settings-layout')
+  if (layout) layout.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+var _origSwitchTab = switchTab
+switchTab = function(name) {
+  _origSwitchTab(name)
+  if (name === 'settings') {
+    loadBrandingForm(); loadPaymentForm(); loadLandingForm()
+    switchSettingsPanel(sessionStorage.getItem('scb_active_spanel') || 'branding')
+  }
+}
+
+// ── Security helpers ───────────────────────────────────────
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
+// Allow http/https URLs and data:image/ URIs (base64 uploads). Block javascript:, data:text, etc.
+function safeUrl(url) {
+  if (!url) return ''
+  var u = String(url).trim()
+  if (/^https?:\/\//i.test(u)) return u
+  if (/^data:image\//i.test(u)) return u
+  return ''
+}
+
+// Sanitise an order ID before embedding in onclick attributes
+function safeId(id) {
+  return String(id).replace(/[^A-Za-z0-9\-_]/g, '')
+}
+
+// ── PIN lock ───────────────────────────────────────────────
+var PIN_MAX_ATTEMPTS   = 5
+var PIN_LOCKOUT_MS     = 300000   // 5-min lockout after 5 failures
+var SESSION_TIMEOUT_MS = 1800000  // 30-min inactivity auto-lock
+var DEFAULT_PIN_HASH   = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4' // sha256('1234')
+var _sessionTimer      = null
+
+async function hashPin(pin) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(pin)))
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0') }).join('')
+}
+
+function getStoredPinHash() {
+  return localStorage.getItem('scb_admin_pin_hash') ||
+    (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH)
+}
+
+function checkAuth() {
+  return sessionStorage.getItem('scb_admin_auth') === 'true'
+}
+
+// Lockout in localStorage so it persists across refreshes and new tabs
+function getPinState() {
+  try { return JSON.parse(localStorage.getItem('scb_pin_state')) || { count: 0, until: 0 } }
+  catch(e) { return { count: 0, until: 0 } }
+}
+
+function savePinState(state) { localStorage.setItem('scb_pin_state', JSON.stringify(state)) }
+
+function lockoutRemaining() {
+  var s = getPinState()
+  return (s.until && Date.now() < s.until) ? Math.ceil((s.until - Date.now()) / 1000) : 0
+}
+
+function resetSessionTimer() {
+  clearTimeout(_sessionTimer)
+  _sessionTimer = setTimeout(function() {
+    if (checkAuth()) { lock(); showToast('Session expired — please log in again.', 'info') }
+  }, SESSION_TIMEOUT_MS)
+}
+
+async function unlock() {
+  var errEl = document.getElementById('pin-error')
+  var secs  = lockoutRemaining()
+  if (secs > 0) {
+    errEl.textContent   = 'Too many attempts. Try again in ' + secs + 's.'
+    errEl.style.display = 'block'
+    document.getElementById('pin-input').value = ''
+    return
+  }
+  var entered     = document.getElementById('pin-input').value
+  var enteredHash = await hashPin(entered)
+  if (enteredHash === getStoredPinHash()) {
+    savePinState({ count: 0, until: 0 })
+    sessionStorage.setItem('scb_admin_auth', 'true')
+    document.getElementById('lock-screen').style.display = 'none'
+    errEl.style.display = 'none'
+    errEl.textContent   = 'Incorrect PIN. Please try again.'
+    document.getElementById('pin-input').value = ''
+    resetSessionTimer()
+    if (!isConfigured()) document.getElementById('setup-banner').style.display = 'flex'
+    render()
+    renderSetupChecklist()
+  } else {
+    var state = getPinState()
+    state.count++
+    if (state.count >= PIN_MAX_ATTEMPTS) {
+      state.until = Date.now() + PIN_LOCKOUT_MS
+      errEl.textContent = 'Too many attempts. Locked for 5 minutes.'
+    } else {
+      var left = PIN_MAX_ATTEMPTS - state.count
+      errEl.textContent = 'Incorrect PIN. ' + left + ' attempt' + (left !== 1 ? 's' : '') + ' remaining.'
+    }
+    savePinState(state)
+    errEl.style.display = 'block'
+    document.getElementById('pin-input').value = ''
+    document.getElementById('pin-input').focus()
+  }
+}
+
+function lock() {
+  sessionStorage.removeItem('scb_admin_auth')
+  clearTimeout(_sessionTimer)
+  document.getElementById('pin-input').value         = ''
+  document.getElementById('pin-error').style.display = 'none'
+  document.getElementById('lock-screen').style.display = 'flex'
+  setTimeout(function() { document.getElementById('pin-input').focus() }, 80)
+}
+
+async function changePin() {
+  var current     = document.getElementById('pin-current').value
+  var newPin      = document.getElementById('pin-new').value
+  var confirm     = document.getElementById('pin-confirm').value
+  var currentHash = await hashPin(current)
+  if (currentHash !== getStoredPinHash()) { alert('Current PIN is incorrect.'); return }
+  if (!newPin || newPin.length < 4) { alert('New PIN must be at least 4 characters.'); return }
+  if (newPin !== confirm) { alert('New PINs do not match.'); return }
+  localStorage.setItem('scb_admin_pin_hash', await hashPin(newPin))
+  localStorage.removeItem('scb_admin_pin')
+  document.getElementById('pin-current').value = ''
+  document.getElementById('pin-new').value     = ''
+  document.getElementById('pin-confirm').value = ''
+  var el = document.getElementById('pin-saved')
+  el.style.display = 'inline'
+  setTimeout(function() { el.style.display = 'none' }, 2500)
+  showToast('PIN changed — publish to Netlify to apply on all browsers.', 'ok')
+}
+
+// Reset inactivity timer on any user action while authenticated
+;['click', 'keydown', 'touchstart'].forEach(function(evt) {
+  document.addEventListener(evt, function() { if (checkAuth()) resetSessionTimer() }, { passive: true })
+})
+
+// Migrate old plaintext PIN to hash on first load
+;(async function() {
+  var old = localStorage.getItem('scb_admin_pin')
+  if (old) {
+    localStorage.setItem('scb_admin_pin_hash', await hashPin(old))
+    localStorage.removeItem('scb_admin_pin')
+  }
+})()
+
+document.getElementById('pin-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') unlock()
+})
+
+// ── Setup checklist ────────────────────────────────────────
+function renderSetupChecklist() {
+  var menu     = []
+  var payment  = {}
+  var branding = {}
+  try { menu     = JSON.parse(localStorage.getItem('scb_menu'))     || [] } catch(e) {}
+  try { payment  = JSON.parse(localStorage.getItem('scb_payment'))  || {} } catch(e) {}
+  try { branding = JSON.parse(localStorage.getItem('scb_branding')) || {} } catch(e) {}
+
+  var pinChanged   = !!localStorage.getItem('scb_admin_pin_hash')
+  var urlOk        = isConfigured()
+  var menuOk       = menu.length > 0
+  var paymentOk    = !!(payment.bank_acct || payment.qr_image || payment.messenger)
+  var brandingOk   = !!(branding.name)
+  var allDone      = urlOk && pinChanged && menuOk && paymentOk && brandingOk
+
+  // Show default PIN warning if PIN never changed
+  document.getElementById('default-pin-banner').style.display = pinChanged ? 'none' : 'flex'
+
+  // Hide checklist once everything is done
+  if (allDone) { document.getElementById('setup-checklist').style.display = 'none'; return }
+
+  function item(done, label, action) {
+    return '<div class="chk-item ' + (done ? 'chk-done' : 'chk-todo') + '">' +
+      '<span class="chk-icon">' + (done ? '✅' : '◻') + '</span>' +
+      (done ? label : '<a href="#" onclick="' + action + ';return false">' + label + '</a>') +
+    '</div>'
+  }
+
+  document.getElementById('checklist-items').innerHTML =
+    item(urlOk,     'Connect Google Sheet',    "switchTab('settings');switchSettingsPanel('integration');document.getElementById('settings-url').focus()") +
+    item(pinChanged,'Change default PIN',       "switchTab('settings');switchSettingsPanel('security');document.getElementById('pin-current').focus()") +
+    item(brandingOk,'Set store name & branding',"switchTab('settings');switchSettingsPanel('branding')") +
+    item(menuOk,    'Add menu items',           "switchTab('menu');openItemModal()") +
+    item(paymentOk, 'Configure payment options',"switchTab('settings');switchSettingsPanel('payment')") +
+    item(true,      'Publish to Netlify after changes', '')
+
+  document.getElementById('setup-checklist').style.display = 'block'
+}
+
+// ── Init ───────────────────────────────────────────────────
+applyBranding()
+updateDocTitle('Orders — Admin')
+if (checkAuth()) {
+  document.getElementById('lock-screen').style.display = 'none'
+  resetSessionTimer()
+  render()
+  renderSetupChecklist()
+  var _savedTab = sessionStorage.getItem('scb_active_tab')
+  if (_savedTab) switchTab(_savedTab)
+} else {
+  setTimeout(function() { document.getElementById('pin-input').focus() }, 80)
+}
+
+// Re-render checklist after saving settings
+var _origSaveUrl = saveUrl
+saveUrl = function() { _origSaveUrl(); renderSetupChecklist() }
+var _chklSaveBranding = saveBranding
+saveBranding = function() {
+  _chklSaveBranding(); renderSetupChecklist()
+  var activeTab = sessionStorage.getItem('scb_active_tab') || 'orders'
+  updateDocTitle((TAB_LABELS[activeTab] || activeTab) + ' — Admin')
+}
+var _chklSaveItem = saveItem
+saveItem = function() { _chklSaveItem(); renderSetupChecklist() }
+var _chklChangePin = changePin
+changePin = async function() { await _chklChangePin(); renderSetupChecklist() }
+var _chklSavePayment = savePaymentSettings
+savePaymentSettings = function() { _chklSavePayment(); renderSetupChecklist() }
+</script>
+</body>
+</html>

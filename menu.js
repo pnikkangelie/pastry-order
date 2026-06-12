@@ -1,0 +1,4 @@
+var BUNDLED_MENU = [];
+var BUNDLED_PAYMENT = {};
+var BUNDLED_BRANDING = {};
+var BUNDLED_LANDING = {};
