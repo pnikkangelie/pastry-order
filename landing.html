@@ -197,13 +197,16 @@
     #featured-empty { display: none; color: var(--muted); font-size: .9rem; margin-top: 1.5rem; }
 
     /* ── Promo banner ────────────────────────────────────────── */
+    .promo-img { max-width: 480px; width: 100%; border-radius: 14px; margin: 1.2rem auto 1.6rem; display: block; box-shadow: 0 6px 30px rgba(0,0,0,.25); }
     #promo-section { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); text-align: center; padding: 3.8rem 1.5rem; }
     .promo-badge { display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); border-radius: 99px; font-size: .73rem; font-weight: 700; padding: .25rem .9rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .8rem; color: #fff; }
     .promo-title { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; letter-spacing: -.025em; color: #fff; margin-bottom: .5rem; }
     .promo-body  { font-size: .97rem; color: rgba(255,255,255,.85); max-width: 480px; margin: 0 auto 1.8rem; line-height: 1.7; }
 
     /* ── What's New ──────────────────────────────────────────── */
-    .news-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 2rem 2.2rem; max-width: 700px; margin: 2rem auto 0; display: flex; gap: 1.5rem; align-items: flex-start; border-left: 4px solid var(--accent); }
+    .news-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 2rem 2.2rem; max-width: 700px; margin: 2rem auto 0; display: flex; flex-direction: column; gap: 0; border-left: 4px solid var(--accent); }
+    .news-card-top { display: flex; gap: 1.5rem; align-items: flex-start; }
+    .news-card-img { width: 100%; border-radius: 10px; margin-top: 1.2rem; max-height: 280px; object-fit: cover; display: block; }
     .news-icon  { font-size: 2.4rem; flex-shrink: 0; line-height: 1; }
     .news-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
     .news-body  { font-size: .9rem; color: var(--muted); line-height: 1.75; }
@@ -287,8 +290,9 @@
 <section id="promo-section" style="display:none">
   <div class="promo-badge">Limited Offer</div>
   <div class="promo-title" id="promo-title"></div>
+  <img id="promo-img" src="" alt="" class="promo-img" style="display:none">
   <div class="promo-body"  id="promo-body"></div>
-  <a href="index.html" class="land-btn-primary" style="font-size:.95rem;padding:.8rem 2rem">Order Now →</a>
+  <a href="index.html" class="land-btn-primary" style="font-size:.95rem;padding:.8rem 2rem;margin-top:1.6rem;display:inline-block">Order Now →</a>
 </section>
 
 <!-- ── What's New ───────────────────────────────────────────── -->
@@ -297,11 +301,14 @@
     <div class="section-eyebrow">What's New</div>
     <h2 class="section-title">Fresh Announcements</h2>
     <div class="news-card">
-      <div class="news-icon">🆕</div>
-      <div>
-        <div class="news-title" id="news-title"></div>
-        <div class="news-body"  id="news-body"></div>
+      <div class="news-card-top">
+        <div class="news-icon">🆕</div>
+        <div>
+          <div class="news-title" id="news-title"></div>
+          <div class="news-body"  id="news-body"></div>
+        </div>
       </div>
+      <img id="news-img" src="" alt="" class="news-card-img" style="display:none">
     </div>
   </div>
 </section>
@@ -411,6 +418,9 @@ function renderAnnouncements() {
   if (s.promo_active && s.promo_title) {
     document.getElementById('promo-title').textContent = s.promo_title
     document.getElementById('promo-body').textContent  = s.promo_body || ''
+    var promoImg = document.getElementById('promo-img')
+    var promoImgUrl = safeUrl(s.promo_img)
+    if (promoImgUrl) { promoImg.src = promoImgUrl; promoImg.style.display = 'block' }
     promo.style.display = 'block'
   }
 
@@ -418,6 +428,9 @@ function renderAnnouncements() {
   if (s.news_active && s.news_title) {
     document.getElementById('news-title').textContent = s.news_title
     document.getElementById('news-body').textContent  = s.news_body || ''
+    var newsImg = document.getElementById('news-img')
+    var newsImgUrl = safeUrl(s.news_img)
+    if (newsImgUrl) { newsImg.src = newsImgUrl; newsImg.style.display = 'block' }
     news.style.display = 'block'
   }
 

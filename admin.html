@@ -360,9 +360,22 @@
             <label>Promo Title</label>
             <input type="text" id="land-promo-title" placeholder="e.g. Weekend Special — 20% off all cakes!">
           </div>
-          <div class="field" style="margin-bottom:.9rem">
+          <div class="field" style="margin-bottom:.55rem">
             <label>Promo Details</label>
             <textarea id="land-promo-body" rows="2" placeholder="More details about the promo…" style="resize:vertical"></textarea>
+          </div>
+          <div class="field" style="margin-bottom:.9rem">
+            <label>Promo Image <span style="font-size:.75rem;color:var(--muted)">(optional)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
+              <input type="text" id="land-promo-img" placeholder="https://… or upload below" style="flex:1;min-width:0" oninput="updateLandImgPreview('promo')">
+              <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">or</span>
+              <button type="button" class="btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('land-promo-img-upload').click()">⬆ Upload</button>
+              <input type="file" id="land-promo-img-upload" accept="image/*" style="display:none">
+            </div>
+            <div id="land-promo-img-preview" style="display:none;text-align:center;margin-top:.35rem">
+              <img id="land-promo-img-thumb" src="" alt="" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--border)">
+              <div style="margin-top:.3rem"><button type="button" class="btn-outline btn-sm" style="font-size:.72rem;color:var(--danger);border-color:var(--danger)" onclick="clearLandImg('promo')">✕ Remove</button></div>
+            </div>
           </div>
           <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🆕 What's New</div>
           <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
@@ -373,9 +386,22 @@
             <label>Headline</label>
             <input type="text" id="land-news-title" placeholder="e.g. Try our new Ube Croissant!">
           </div>
-          <div class="field" style="margin-bottom:.9rem">
+          <div class="field" style="margin-bottom:.55rem">
             <label>Details</label>
             <textarea id="land-news-body" rows="2" placeholder="A short description…" style="resize:vertical"></textarea>
+          </div>
+          <div class="field" style="margin-bottom:.9rem">
+            <label>Announcement Image <span style="font-size:.75rem;color:var(--muted)">(optional)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
+              <input type="text" id="land-news-img" placeholder="https://… or upload below" style="flex:1;min-width:0" oninput="updateLandImgPreview('news')">
+              <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">or</span>
+              <button type="button" class="btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('land-news-img-upload').click()">⬆ Upload</button>
+              <input type="file" id="land-news-img-upload" accept="image/*" style="display:none">
+            </div>
+            <div id="land-news-img-preview" style="display:none;text-align:center;margin-top:.35rem">
+              <img id="land-news-img-thumb" src="" alt="" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--border)">
+              <div style="margin-top:.3rem"><button type="button" class="btn-outline btn-sm" style="font-size:.72rem;color:var(--danger);border-color:var(--danger)" onclick="clearLandImg('news')">✕ Remove</button></div>
+            </div>
           </div>
           <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.5rem">🏠 About the Store</div>
           <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
@@ -506,13 +532,16 @@
     <div class="field"><label>Price (₱) *</label><input type="number" id="item-price" placeholder="0" min="0" step="1"></div>
     <div class="field"><label>Description</label><input type="text" id="item-desc" placeholder="Short description shown to customers"></div>
     <div class="field">
-      <label>Photo URL</label>
-      <input type="url" id="item-img" placeholder="Paste Google Drive or image link here">
-      <span style="font-size:.72rem;color:var(--muted);margin-top:.25rem;display:block">
-        Google Drive: right-click photo → Share → Anyone with link → Copy link, then paste here.
-      </span>
-      <div id="item-img-preview" style="margin-top:.5rem;display:none">
+      <label>Photo</label>
+      <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
+        <input type="text" id="item-img" placeholder="Paste image URL or upload" style="flex:1;min-width:0" oninput="updateImgPreview(this.value)">
+        <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">or</span>
+        <button type="button" class="btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('item-img-file-upload').click()">⬆ Upload</button>
+        <input type="file" id="item-img-file-upload" accept="image/*" style="display:none">
+      </div>
+      <div id="item-img-preview" style="margin-top:.4rem;display:none">
         <img id="item-img-thumb" style="width:100%;max-height:140px;object-fit:cover;border-radius:7px;border:1.5px solid var(--border)">
+        <div style="margin-top:.3rem"><button type="button" class="btn-outline btn-sm" style="font-size:.72rem;color:var(--danger);border-color:var(--danger)" onclick="document.getElementById('item-img').value='';updateImgPreview('')">✕ Remove</button></div>
       </div>
     </div>
     <input type="hidden" id="item-id">
@@ -1356,6 +1385,51 @@ document.getElementById('qr-file-upload').addEventListener('change', function(e)
   reader.readAsDataURL(file)
 })
 
+function updateLandImgPreview(type) {
+  var url  = safeUrl(document.getElementById('land-' + type + '-img').value.trim())
+  var wrap = document.getElementById('land-' + type + '-img-preview')
+  var img  = document.getElementById('land-' + type + '-img-thumb')
+  if (url) { img.src = url; wrap.style.display = 'block' } else { img.src = ''; wrap.style.display = 'none' }
+}
+
+function clearLandImg(type) {
+  document.getElementById('land-' + type + '-img').value = ''
+  document.getElementById('land-' + type + '-img-thumb').src = ''
+  document.getElementById('land-' + type + '-img-preview').style.display = 'none'
+}
+
+;['promo', 'news'].forEach(function(type) {
+  document.getElementById('land-' + type + '-img-upload').addEventListener('change', function(e) {
+    var file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { showToast('Please select an image file.', 'err'); return }
+    if (file.size > 2 * 1024 * 1024) { showToast('Image too large — please use a file under 2 MB.', 'err'); return }
+    var reader = new FileReader()
+    reader.onload = function(ev) {
+      document.getElementById('land-' + type + '-img').value = ev.target.result
+      updateLandImgPreview(type)
+      showToast('✓ Image uploaded — click Save to apply', 'ok')
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  })
+})
+
+document.getElementById('item-img-file-upload').addEventListener('change', function(e) {
+  var file = e.target.files[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) { showToast('Please select an image file.', 'err'); return }
+  if (file.size > 2 * 1024 * 1024) { showToast('Image too large — please use a file under 2 MB.', 'err'); return }
+  var reader = new FileReader()
+  reader.onload = function(ev) {
+    document.getElementById('item-img').value = ev.target.result
+    updateImgPreview(ev.target.result)
+    showToast('✓ Photo uploaded', 'ok')
+  }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+})
+
 function savePaymentSettings() {
   var settings = {
     bank_name:      document.getElementById('pay-bank-name').value.trim(),
@@ -1378,11 +1452,15 @@ function loadLandingForm() {
   document.getElementById('land-promo-active').checked  = !!s.promo_active
   document.getElementById('land-promo-title').value     = s.promo_title  || ''
   document.getElementById('land-promo-body').value      = s.promo_body   || ''
+  document.getElementById('land-promo-img').value       = s.promo_img    || ''
   document.getElementById('land-news-active').checked   = !!s.news_active
   document.getElementById('land-news-title').value      = s.news_title   || ''
   document.getElementById('land-news-body').value       = s.news_body    || ''
+  document.getElementById('land-news-img').value        = s.news_img     || ''
   document.getElementById('land-about-active').checked  = !!s.about_active
   document.getElementById('land-about-text').value      = s.about_text   || ''
+  updateLandImgPreview('promo')
+  updateLandImgPreview('news')
 }
 
 function saveLandingSettings() {
@@ -1390,9 +1468,11 @@ function saveLandingSettings() {
     promo_active: document.getElementById('land-promo-active').checked,
     promo_title:  document.getElementById('land-promo-title').value.trim(),
     promo_body:   document.getElementById('land-promo-body').value.trim(),
+    promo_img:    document.getElementById('land-promo-img').value.trim(),
     news_active:  document.getElementById('land-news-active').checked,
     news_title:   document.getElementById('land-news-title').value.trim(),
     news_body:    document.getElementById('land-news-body').value.trim(),
+    news_img:     document.getElementById('land-news-img').value.trim(),
     about_active: document.getElementById('land-about-active').checked,
     about_text:   document.getElementById('land-about-text').value.trim()
   }
