@@ -3,1862 +3,372 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Place an Order — Pastry Palette by Nikk</title>
-  <meta property="og:title" content="Place an Order — Pastry Palette by Nikk">
+  <title>Pastry Palette by Nikk</title>
+  <meta property="og:title" content="Pastry Palette by Nikk">
   <meta property="og:description" content="Every Dessert. A work of art">
   <meta property="og:type" content="website">
   <meta name="description" content="Every Dessert. A work of art">
-  <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
-  <script src="branding.js"></script>
   <script src="menu.js"></script>
+  <script src="branding.js"></script>
   <style>
-    /* ── Animations ──────────────────────────────────────── */
-    @keyframes slideDown   { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
-    @keyframes popIn       { 0% { transform:scale(0); opacity:0; } 65% { transform:scale(1.18); } 100% { transform:scale(1); opacity:1; } }
-    @keyframes fadeSlideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes badgePop    { 0% { transform:scale(1); } 40% { transform:scale(1.45); } 100% { transform:scale(1); } }
-    @keyframes cartDropIn  { from { opacity:0; transform:scale(.94) translateY(-8px); } to { opacity:1; transform:scale(1) translateY(0); } }
-    @keyframes pageFadeIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
-    body { animation: pageFadeIn .35s ease both; }
+    :root {
+      --primary:    #7b4a2c;
+      --primary-h:  #6a3f25;
+      --primary-lt: #f5ede6;
+      --accent:     #c97d47;
+      --bg:         #faf8f5;
+      --surface:    #ffffff;
+      --border:     #ede0d4;
+      --text:       #2c1810;
+      --muted:      #8a7060;
+      --shadow:     0 2px 12px rgba(60,30,10,.09);
+      --shadow-lg:  0 8px 40px rgba(60,30,10,.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    img { display: block; max-width: 100%; }
 
-    /* ── Sticky nav ─────────────────────────────────────────── */
-    .site-nav {
-      position: sticky; top: 0; z-index: 200;
-      --nav-fill: 0;
-      background: linear-gradient(135deg, #2c1a0e 0%, var(--primary) 60%, var(--accent) 100%);
-      background-size: cover; background-position: center;
-      padding: .72rem 1.5rem;
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-      animation: slideDown .45s cubic-bezier(.22,.68,0,1.1) both;
-      isolation: isolate;
-      border-bottom: 1px solid rgba(0,0,0,.12);
-    }
-    /* Glassmorphism overlay fades in as hero scrolls away */
-    .site-nav::before {
-      content: ''; position: absolute; inset: 0; z-index: 0;
-      background: rgba(255,252,249,.95);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 1px 0 rgba(123,74,44,.12);
-      opacity: var(--nav-fill, 0);
-      pointer-events: none;
-    }
-    .site-nav > * { position: relative; z-index: 1; }
-    .nav-home {
-      display: flex; align-items: center; gap: .5rem;
-      font-weight: 800; color: #fff; font-size: .95rem;
-      background: none; border: none; cursor: pointer; padding: 0; font: inherit; font-weight: 800;
-      transition: color .25s ease;
-    }
-    .site-nav.nav-light .nav-home { color: var(--primary); }
-    .nav-home .n-emoji { font-size: 1.45rem; transition: transform .28s cubic-bezier(.34,1.56,.64,1); }
-    .nav-home:hover .n-emoji { transform: rotate(-10deg) scale(1.18); }
-    .nav-cart {
-      display: none; align-items: center; gap: .4rem;
-      background: rgba(255,255,255,.18); color: #fff;
-      border: 1.5px solid rgba(255,255,255,.35);
-      border-radius: 99px; padding: .4rem 1.05rem .4rem .8rem;
-      font-size: .82rem; font-weight: 700; cursor: pointer; font: inherit; font-weight: 700;
-      box-shadow: 0 2px 10px rgba(0,0,0,.18);
-      transition: transform .14s, background .25s, border-color .25s, color .25s;
-    }
-    .nav-cart.visible { display: flex; animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both; }
-    .nav-cart:hover   { transform: translateY(-1px); }
-    .nav-cart.open    { background: rgba(255,255,255,.32); }
-    .site-nav.nav-light .nav-cart { background: var(--primary); border-color: var(--primary); color: #fff; }
-    .nav-cart-anim    { animation: badgePop .3s ease both; }
-
-    /* ── Hero ───────────────────────────────────────────────── */
-    .order-hero {
-      background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 55%, var(--accent) 100%);
-      color: #fff; padding: 3rem 1.5rem 2.6rem; text-align: center;
-      position: relative; overflow: hidden;
-    }
-    .order-hero::before {
-      content: ''; position: absolute; width: 480px; height: 480px;
-      background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 68%);
-      top: -140px; right: -60px; pointer-events: none;
-    }
-    .order-hero.has-banner-img { padding: 4rem 1.5rem 3.2rem; background-size: cover; background-position: center; }
-    .order-hero.has-banner-img::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(150deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.3) 100%);
-      width: auto; height: auto;
-    }
-    .order-hero-content { position: relative; z-index: 1; }
-    .order-hero h1 { font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 900; letter-spacing: -.025em; margin: 0 0 .45rem; }
-    .order-hero p  { font-size: .93rem; opacity: .76; margin: 0 auto; max-width: 420px; }
-
-    /* ── Cart dropdown ────────────────────────────────────── */
-    .cart-dropdown {
-      position: absolute; top: calc(100% + .5rem); right: 1.25rem;
-      width: min(340px, calc(100vw - 2rem));
-      background: var(--surface); border: 1px solid rgba(230,217,206,.7);
-      border-radius: 20px; box-shadow: 0 8px 40px rgba(60,42,30,.15), 0 2px 8px rgba(60,42,30,.07);
-      z-index: 300; overflow: hidden; transform-origin: top right;
-      animation: cartDropIn .22s cubic-bezier(.22,.68,0,1.15) both;
-    }
-    .cart-drop-head { background: var(--primary); color: #fff; padding: .8rem 1.15rem; font-size: .9rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
-    .cart-drop-close { background: none; border: none; color: rgba(255,255,255,.8); font-size: 1.15rem; cursor: pointer; padding: 0; line-height: 1; transition: color .12s; }
-    .cart-drop-close:hover { color: #fff; }
-    .cart-drop-items { max-height: 240px; overflow-y: auto; padding: .4rem 0; }
-    .cart-drop-row { display: flex; align-items: center; gap: .55rem; padding: .52rem 1.15rem; font-size: .86rem; border-bottom: 1px solid var(--border); }
-    .cart-drop-row:last-child { border-bottom: none; }
-    .cart-drop-qty  { background: var(--primary-lt); color: var(--primary); font-weight: 700; font-size: .72rem; border-radius: 6px; padding: .1rem .38rem; flex-shrink: 0; }
-    .cart-drop-name { flex: 1; color: var(--text); }
-    .cart-drop-price { color: var(--primary); font-weight: 600; flex-shrink: 0; }
-    .cart-drop-foot { border-top: 1px solid var(--border); padding: .85rem 1.15rem; }
-    .cart-drop-total { display: flex; justify-content: space-between; font-weight: 700; font-size: .92rem; color: var(--text); margin-bottom: .7rem; }
-    .cart-drop-total span:last-child { color: var(--primary); }
-    .cart-drop-actions { display: flex; gap: .5rem; }
-    .cart-drop-actions .btn-outline { flex: 1; padding: .5rem; font-size: .82rem; }
-    .cart-drop-actions .btn-primary { flex: 2; padding: .5rem; font-size: .82rem; }
-    .cart-drop-confirm { text-align: center; padding: .25rem 0 .1rem; font-size: .86rem; color: var(--text); font-weight: 600; }
-    .cart-drop-confirm p { margin: 0 0 .55rem; }
-
-    /* ── Toast snackbar ────────────────────────────────────── */
-    .toast-bar {
-      position: fixed; bottom: 5.5rem; left: 50%;
-      transform: translateX(-50%) translateY(.75rem);
-      background: #1c1c1e; color: #fff; padding: .65rem 1.4rem;
-      border-radius: 99px; font-size: .875rem; font-weight: 500;
-      z-index: 9999; opacity: 0; pointer-events: none; white-space: nowrap;
-      box-shadow: 0 4px 20px rgba(0,0,0,.25);
-      transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
-    }
-    .toast-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-
-    /* ── Messenger button ─────────────────────────────────── */
-    .messenger-btn {
-      display: inline-flex; align-items: center; gap: .45rem;
-      background: #0084FF; color: #fff !important;
-      border-radius: 99px; padding: .5rem 1.1rem;
-      font-size: .82rem; font-weight: 700; text-decoration: none;
-      margin-top: .85rem; box-shadow: 0 2px 12px rgba(0,132,255,.35);
-      transition: background .14s, transform .14s, box-shadow .14s;
-    }
-    .messenger-btn:hover { background: #006dd1; transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,132,255,.45); }
-
-    /* ── Floating contact button ──────────────────────────── */
-    .contact-float {
-      position: fixed; bottom: 5.5rem; left: 1rem; z-index: 190;
-      background: #0084FF; color: #fff; border-radius: 99px; padding: .6rem 1.15rem .6rem .8rem;
-      font-size: .83rem; font-weight: 700; text-decoration: none;
-      display: none; align-items: center; gap: .4rem;
-      box-shadow: 0 4px 20px rgba(0,132,255,.38);
-      transition: background .15s, transform .15s, box-shadow .15s;
-      animation: popIn .4s .6s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    .contact-float.visible { display: flex; }
-    .contact-float:hover { background: #006dd1; transform: scale(1.04); box-shadow: 0 6px 24px rgba(0,132,255,.48); }
-    @media (min-width: 741px) { .contact-float { bottom: 1.5rem; } }
-
-    /* ── Layout ───────────────────────────────────────────── */
-    .order-wrap {
-      max-width: 1080px; margin: 0 auto;
-      padding: 1.75rem 1.25rem 5rem;
-      display: grid; grid-template-columns: 1fr 315px; gap: 1.5rem; align-items: start;
-    }
-    @media (max-width: 740px) {
-      .order-wrap { grid-template-columns: 1fr; padding-bottom: 6.5rem; }
-      .order-summary-col { display: none; }
-    }
-
-    /* ── Progress stepper ─────────────────────────────────── */
-    .step-progress { display: flex; align-items: flex-start; margin-bottom: 1.4rem; }
-    .p-step { display: flex; flex-direction: column; align-items: center; gap: .28rem; }
-    .p-dot {
-      width: 36px; height: 36px; border-radius: 50%;
-      font-size: .82rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      border: 2.5px solid var(--border); background: var(--surface); color: var(--muted);
-      transition: all .3s cubic-bezier(.34,1.56,.64,1);
-    }
-    .p-label { font-size: .75rem; font-weight: 600; white-space: nowrap; transition: color .2s; color: var(--muted); }
-    .p-step.active   .p-dot   { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 0 0 5px var(--primary-lt); }
-    .p-step.active   .p-label { color: var(--primary); font-weight: 700; }
-    .p-step.done     .p-dot   { background: var(--success); border-color: var(--success); color: #fff; cursor: pointer; }
-    .p-step.done     .p-label { color: var(--success); cursor: pointer; }
-    .p-step.inactive .p-dot   { background: var(--surface); border-color: var(--border); color: var(--muted); }
-    .p-line { flex: 1; height: 2px; margin: 17px .4rem 0; background: var(--border); border-radius: 99px; transition: background .35s; }
-    .p-line.done { background: var(--success); }
-
-    /* ── Step card ────────────────────────────────────────── */
-    .step-card {
-      background: var(--surface); border-radius: 20px;
-      border: 1px solid rgba(230,217,206,.55);
-      box-shadow: 0 2px 8px rgba(60,42,30,.04), 0 8px 32px rgba(60,42,30,.07);
-      overflow: hidden; animation: fadeSlideUp .38s cubic-bezier(.22,.68,0,1.1) both;
-      display: flex; flex-direction: column;
-      height: calc(100vh - 180px); height: calc(100svh - 160px); min-height: 420px;
-    }
-    .step-head { display: flex; align-items: center; gap: .75rem; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .step-num {
-      width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-      color: #fff; font-size: .78rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .step-head h2 { font-size: .97rem; font-weight: 700; color: var(--text); margin: 0; }
-    .step-body { padding: 1.3rem 1.4rem; flex: 1; min-height: 0; overflow-y: auto; }
-    .step-nav {
-      display: flex; gap: .65rem; justify-content: flex-end; align-items: center;
-      padding: .9rem 1.4rem; border-top: 1px solid var(--border);
-      background: linear-gradient(to bottom, rgba(250,247,242,.6), rgba(250,247,242,.9));
-      flex-shrink: 0;
-    }
-    .btn-back { margin-right: auto; background: none; border: none; color: var(--muted); font: inherit; font-size: .85rem; cursor: pointer; padding: .4rem .25rem; display: flex; align-items: center; gap: .3rem; transition: color .14s; }
-    .btn-back:hover { color: var(--primary); }
-    .btn-danger { background: none; border: 1.5px solid var(--danger); color: var(--danger); border-radius: 10px; padding: .5rem .95rem; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .14s; }
-    .btn-danger:hover { background: var(--danger); color: #fff; }
-
-    /* ── Category pills ───────────────────────────────────── */
-    .cat-pills { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
-    .cat-pill {
-      padding: .45rem 1rem; border-radius: 99px; border: 1.5px solid var(--border);
-      background: var(--surface); font-size: .84rem; font-weight: 600; color: var(--muted);
-      cursor: pointer; transition: all .16s; white-space: nowrap; line-height: 1.4;
-      min-height: 36px; display: inline-flex; align-items: center;
-    }
-    .cat-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(123,74,44,.28); }
-    .cat-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); background: var(--primary-lt); }
-
-    /* ── Product grid ─────────────────────────────────────── */
-    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.6rem, 2.5vw, .9rem); }
-    @media (max-width: 740px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
-    .product-card {
-      background: var(--surface); border-radius: 18px; overflow: hidden;
-      border: 1.5px solid transparent;
-      box-shadow: 0 1px 4px rgba(60,42,30,.06), 0 4px 16px rgba(60,42,30,.04);
-      transition: box-shadow .22s, transform .22s, border-color .16s;
-      display: flex; flex-direction: column;
-    }
-    .product-card:hover { box-shadow: 0 4px 24px rgba(60,42,30,.13), 0 1px 4px rgba(60,42,30,.06); transform: translateY(-4px); }
-    .product-card.has-qty { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,125,71,.15), 0 4px 20px rgba(60,42,30,.1); }
-    .item-img-wrap { position: relative; height: clamp(90px, 22vw, 145px); background: var(--primary-lt); overflow: hidden; flex-shrink: 0; }
-    .item-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
-    .product-card:hover .item-img-wrap img { transform: scale(1.07); }
-    .item-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; opacity: .28; }
-    .item-qty-badge {
-      position: absolute; top: 8px; right: 8px;
-      background: var(--primary); color: #fff; font-size: .7rem; font-weight: 800;
-      min-width: 22px; height: 22px; border-radius: 99px; padding: 0 6px;
-      display: none; align-items: center; justify-content: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,.22);
-    }
-    .product-card.has-qty .item-qty-badge { display: flex; }
-    .item-info { padding: .7rem .8rem .85rem; position: relative; flex: 1; display: flex; flex-direction: column; }
-    .item-name {
-      font-size: .88rem; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: .15rem;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .item-desc {
-      font-size: .74rem; color: var(--muted); line-height: 1.45; margin-bottom: .6rem; flex: 1;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      min-height: calc(2 * 1.45 * .74rem);
-    }
-    .item-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-    .item-price { font-size: .92rem; font-weight: 800; color: var(--primary); }
-
-    /* ── Round add-to-cart icon button ── */
-    .add-to-cart-btn {
-      width: 38px; height: 38px; border-radius: 50%; padding: 0; flex-shrink: 0;
-      border: none; background: var(--primary); color: #fff; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 1; transform: scale(1); pointer-events: auto;
-      transition: opacity .22s ease, transform .26s cubic-bezier(.34,1.56,.64,1), background .14s;
-      box-shadow: 0 2px 8px rgba(123,74,44,.28);
-    }
-    .add-to-cart-btn:hover { background: var(--primary-h); transform: scale(1.12); }
-    .add-to-cart-btn:active { transform: scale(.94); }
-
-    /* ── Overlay states: positioned over the footer row ── */
-    .item-added-bar,
-    .qty-ctrl {
-      position: absolute; left: .9rem; right: .9rem; bottom: .92rem;
-      height: 38px; display: flex; align-items: center;
-      transition: opacity .22s ease, transform .26s cubic-bezier(.34,1.56,.64,1);
-    }
-    .item-added-bar {
-      justify-content: space-between; background: var(--bg);
-      opacity: 0; transform: translateY(8px); pointer-events: none;
-    }
-    .item-in-cart { font-size: .76rem; font-weight: 600; color: #16a34a; }
-    .item-edit-btn {
-      background: none; border: 1.5px solid var(--border); border-radius: 8px;
-      color: var(--muted); font: inherit; font-size: .72rem; font-weight: 600;
-      cursor: pointer; padding: .18rem .6rem;
-      transition: border-color .14s, color .14s;
-    }
-    .item-edit-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-    /* ── Qty controls ── */
-    .qty-ctrl { gap: .3rem; background: var(--bg); opacity: 0; transform: translateY(8px); pointer-events: none; }
-    .qty-btn {
-      width: 34px; height: 34px; border-radius: 99px; border: none;
-      background: var(--primary-lt); color: var(--primary);
-      font-size: 1.1rem; line-height: 1; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .14s, color .14s, transform .12s; padding: 0; flex-shrink: 0;
-    }
-    .qty-btn:hover { background: var(--primary); color: #fff; transform: scale(1.12); }
-    .qty-display { font-size: .87rem; font-weight: 700; min-width: 20px; text-align: center; color: var(--text); }
-    .qty-done-btn {
-      margin-left: auto; background: none; border: none;
-      color: var(--primary); font: inherit; font-size: .72rem; font-weight: 700;
-      cursor: pointer; padding: .2rem .3rem; transition: opacity .14s;
-    }
-    .qty-done-btn:hover { opacity: .7; }
-
-    /* ── State transitions ── */
-    .product-card.has-qty .add-to-cart-btn { opacity: 0; transform: scale(.7); pointer-events: none; }
-    .product-card.has-qty .item-added-bar  { opacity: 1; transform: none;      pointer-events: auto; }
-
-    .product-card.has-qty.is-editing .item-added-bar { opacity: 0; transform: translateY(-8px); pointer-events: none; }
-    .product-card.has-qty.is-editing .qty-ctrl       { opacity: 1; transform: none;             pointer-events: auto; }
-
-    /* Add-to-cart pop feedback */
-    @keyframes cardAddPop { 0%,100% { transform: scale(1); } 40% { transform: scale(1.035); } }
-    .product-card.just-added { animation: cardAddPop .32s cubic-bezier(.34,1.56,.64,1); }
-
-    /* ── Pickup / Delivery + Payment toggles ──────────────── */
-    .type-toggle { display: grid; gap: .6rem; margin-bottom: 1.15rem; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); }
-    .type-opt input { display: none; }
-    .type-opt label {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: .95rem .6rem; cursor: pointer; gap: .22rem;
-      border: 2px solid var(--border); border-radius: 16px; background: var(--bg);
-      transition: border-color .15s, background .15s, box-shadow .15s; min-height: 78px;
-    }
-    .type-opt label .t-icon { font-size: 1.55rem; }
-    .type-opt label strong { font-size: .84rem; color: var(--text); font-weight: 700; text-align: center; }
-    .type-opt label small  { font-size: .7rem; color: var(--muted); text-align: center; }
-    .type-opt input:checked + label { border-color: var(--primary); background: var(--primary-lt); box-shadow: 0 0 0 1px var(--primary); }
-    .type-opt input:checked + label strong { color: var(--primary); }
-    @media (max-width: 380px) {
-      .type-opt label small { display: none; }
-      .type-opt label { padding: .75rem .3rem; min-height: 62px; }
-    }
-
-    /* ── Payment info ─────────────────────────────────────── */
-    .pay-section-label { font-size: .8rem; font-weight: 700; color: var(--text); display: block; margin: 1.1rem 0 .55rem; letter-spacing: .01em; }
-    .pay-info-box { background: var(--primary-lt); border: 1px solid rgba(123,74,44,.14); border-radius: 14px; padding: .95rem 1.1rem; margin-top: .65rem; font-size: .88rem; line-height: 1.75; }
-    .pay-info-box strong { color: var(--primary); }
-    .pay-qr-wrap { text-align: center; margin-top: .75rem; }
-    .pay-qr-wrap img { max-width: 210px; width: 100%; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-    .pay-qr-label { font-size: .85rem; font-weight: 700; color: var(--primary); margin-bottom: .45rem; }
-    .pay-qr-hint  { font-size: .75rem; color: var(--muted); margin-top: .5rem; }
-    .pay-not-configured { background: #fff3df; border: 1px solid #f0c040; border-radius: 12px; padding: .7rem 1rem; font-size: .83rem; color: #7a5400; margin-top: .65rem; }
-    .pay-confirm-box { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 16px; padding: 1.05rem 1.15rem; margin-top: .9rem; }
-    .pay-confirm-box .pcb-title { font-size: .8rem; font-weight: 700; color: #92400e; margin-bottom: .5rem; display: flex; align-items: center; gap: .35rem; }
-    .pay-confirm-box .pcb-details { font-size: .84rem; color: #78350f; line-height: 1.75; margin-bottom: .75rem; background: rgba(255,255,255,.65); border-radius: 10px; padding: .6rem .8rem; }
-    .pay-confirm-check { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer; }
-    .pay-confirm-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; margin-top: .12rem; cursor: pointer; }
-    .pay-confirm-check span { font-size: .86rem; font-weight: 600; color: #78350f; line-height: 1.45; }
-    .pay-cash-note { background: var(--primary-lt); border-left: 3px solid var(--accent); border-radius: 10px; padding: .65rem .95rem; font-size: .83rem; color: var(--primary); margin-top: .9rem; }
-    /* Payment detail panel transitions */
-    #pay-details { transition: opacity .18s ease; }
-    #pay-details.pay-fading { opacity: 0; }
-    @keyframes refSlideIn { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
-    #pay-ref-block { display: none; margin-top: .65rem; }
-    #pay-ref-block.ref-visible { display: block; animation: refSlideIn .26s cubic-bezier(.34,1.56,.64,1) both; }
-    #pay-section { display: none; margin-top: .5rem; }
-    #pay-section.pay-visible { display: block; animation: refSlideIn .3s cubic-bezier(.34,1.56,.64,1) both; }
-
-    /* ── Form fields ──────────────────────────────────────── */
-    .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
-    @media (max-width: 420px) { .dt-grid { grid-template-columns: 1fr; } }
-    .field { margin-bottom: .9rem; }
-    .field:last-child { margin-bottom: 0; }
-    .field label { display: block; font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: .38rem; letter-spacing: .01em; }
-    .field input, .field select, .field textarea {
-      width: 100%; border: 1.5px solid var(--border); border-radius: 11px;
-      padding: .72rem .95rem; font: inherit; font-size: 1rem;
-      background: var(--surface); color: var(--text);
-      transition: border-color .15s, box-shadow .15s;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3.5px rgba(201,125,71,.14);
-    }
-    .field textarea { resize: vertical; min-height: 82px; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
-    @media (max-width: 460px) { .field-row { grid-template-columns: 1fr; } }
-
-    /* ── Review step ──────────────────────────────────────── */
-    #step-4 .step-card { height: auto; min-height: 0; }
-    #step-4 .step-body { overflow: visible; flex: none; }
-    .review-grid { display: flex; gap: .65rem; align-items: flex-start; }
-    .review-col-left  { flex: 1; min-width: 0; }
-    .review-col-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .65rem; }
-    @media (max-width: 430px) { .review-grid { flex-direction: column; } }
-    .review-block { background: var(--bg); border: 1px solid rgba(230,217,206,.8); border-radius: 14px; padding: .85rem .95rem; }
-    .review-block h4 { font-size: .71rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .55rem; font-weight: 700; }
-    .review-row { display: flex; justify-content: space-between; font-size: .88rem; padding: .2rem 0; }
-    .review-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; color: var(--primary); border-top: 1.5px solid var(--border); margin-top: .55rem; padding-top: .55rem; }
-    .review-meta { font-size: .88rem; color: var(--text); line-height: 1.85; }
-    .review-confirm-wrap { margin-top: .65rem; }
-
-    /* ── Sticky summary ───────────────────────────────────── */
-    .order-summary-col { position: sticky; top: 66px; }
-    .summary-card { background: var(--surface); border: 1px solid rgba(230,217,206,.6); border-radius: 20px; box-shadow: 0 2px 8px rgba(60,42,30,.04), 0 8px 32px rgba(60,42,30,.07); overflow: hidden; }
-    .summary-head { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-h) 100%); color: #fff; padding: .92rem 1.15rem; display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: .92rem; }
-    .summary-head .s-count { background: rgba(255,255,255,.2); border-radius: 99px; font-size: .73rem; padding: .1rem .55rem; }
-    .summary-items { padding: .72rem 1.1rem; min-height: 58px; max-height: 260px; overflow-y: auto; }
-    .s-empty { text-align: center; color: var(--muted); font-size: .82rem; padding: .65rem 0; }
-    .s-row { display: flex; align-items: center; gap: .45rem; padding: .4rem 0; border-bottom: 1px solid var(--border); font-size: .84rem; }
-    .s-row:last-child { border-bottom: none; }
-    .s-qty { background: var(--primary-lt); color: var(--primary); font-weight: 700; font-size: .72rem; border-radius: 6px; padding: .1rem .36rem; flex-shrink: 0; }
-    .s-name { flex: 1; color: var(--text); }
-    .s-price { color: var(--primary); font-weight: 600; flex-shrink: 0; }
-    .s-qty-ctrl { display: flex; align-items: center; gap: .2rem; flex-shrink: 0; }
-    .s-qty-btn { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border); background: none; font-size: 1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: background .12s, border-color .12s; padding: 0; font: inherit; }
-    .s-qty-btn:hover { background: var(--primary-lt); border-color: var(--accent); }
-    .s-qty-num { font-size: .8rem; font-weight: 700; min-width: 16px; text-align: center; color: var(--text); }
-    .summary-foot { border-top: 1px solid var(--border); padding: .92rem 1.15rem; background: rgba(250,247,242,.55); }
-    .total-row { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; margin-bottom: .9rem; }
-    .total-row .t-label { font-size: .84rem; color: var(--muted); }
-    .total-row .t-val   { font-size: 1.2rem; color: var(--primary); }
-    .summary-note { font-size: .73rem; color: var(--muted); text-align: center; margin-top: .65rem; line-height: 1.5; }
-
-    /* ── Mobile floating bar ──────────────────────────────── */
-    .mobile-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; padding: .8rem 1.1rem calc(.8rem + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -4px 24px rgba(0,0,0,.09); z-index: 100; }
-    @media (max-width: 740px) { .mobile-bar { display: block; } }
-    .mobile-bar-btn {
-      width: 100%; color: #fff; border: none; border-radius: 14px;
-      padding: .92rem 1.15rem; font: inherit; font-size: .96rem; font-weight: 700; cursor: pointer;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .land-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 4px 18px rgba(123,74,44,.32);
-      transition: opacity .14s, transform .12s, box-shadow .14s;
+      padding: .85rem 1.5rem;
+      background: rgba(255,252,249,.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(230,217,206,.5);
     }
-    .mobile-bar-btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
-    .mobile-bar-btn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(123,74,44,.42); }
-    .mb-left  { display: flex; align-items: center; gap: .55rem; }
-    .mb-badge { background: rgba(255,255,255,.22); border-radius: 99px; font-size: .75rem; padding: .1rem .5rem; }
-    .mb-total { font-size: 1rem; font-weight: 700; }
-
-    /* ── Receipt modal ────────────────────────────────────── */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 500; padding: 1rem; }
-    .modal { background: var(--surface); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,.24); max-width: 440px; width: 100%; max-height: 92vh; overflow-y: auto; display: flex; flex-direction: column; }
-
-    /* ── Thank-you hero ──────────────────────────────────────── */
-    @keyframes ty-ring  { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    @keyframes ty-check { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 65% { transform: scale(1.15) rotate(4deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
-    @keyframes ty-up    { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-    .ty-hero { background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 55%, var(--accent) 100%); color: #fff; padding: 2.6rem 1.6rem 2rem; text-align: center; border-radius: 24px 24px 0 0; }
-    .ty-ring { width: 76px; height: 76px; border-radius: 50%; border: 3px solid rgba(255,255,255,.4); background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.05rem; animation: ty-ring .45s cubic-bezier(.34,1.56,.64,1) both; }
-    .ty-check-icon { font-size: 2rem; line-height: 1; display: block; animation: ty-check .5s cubic-bezier(.34,1.56,.64,1) .18s both; }
-    .ty-title { font-size: clamp(1.25rem,4vw,1.55rem); font-weight: 900; letter-spacing: -.02em; margin: 0 0 .3rem; animation: ty-up .4s ease .3s both; }
-    .ty-sub   { font-size: .88rem; opacity: .82; margin: 0 0 1rem; animation: ty-up .4s ease .4s both; }
-    .ty-order-id { display: inline-block; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); border-radius: 99px; font-family: monospace; font-size: .78rem; font-weight: 700; padding: .28rem 1rem; letter-spacing: .04em; animation: ty-up .4s ease .5s both; }
-
-    /* ── Receipt paper ───────────────────────────────────────── */
-    .receipt-body { border-top: 1px solid var(--border); }
-    .rcp-paper { background: #fafaf8; padding: 1.15rem 1.4rem 1rem; font-family: 'Courier New', Courier, monospace; font-size: .8rem; line-height: 1.75; color: #1c1c1e; }
-    .rcp-store  { text-align: center; font-size: .92rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-    .rcp-center { text-align: center; color: #777; font-size: .76rem; margin-top: .1rem; }
-    .rcp-dash   { border: none; border-top: 1.5px dashed #ccc; margin: .65rem 0; }
-    .rcp-row    { display: flex; justify-content: space-between; align-items: baseline; gap: .35rem; }
-    .rcp-name   { flex: 1; }
-    .rcp-price  { flex-shrink: 0; text-align: right; }
-    .rcp-qty    { color: #555; min-width: 2rem; }
-    .rcp-total  { font-weight: 800; font-size: .9rem; }
-    .rcp-lbl    { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: #999; margin: .45rem 0 .05rem; }
-    .rcp-meta   { color: #444; }
-    .rcp-note   { color: #777; font-size: .76rem; font-style: italic; }
-    .rcp-footer { text-align: center; font-size: .78rem; color: #666; padding-top: .2rem; line-height: 1.6; }
-    .rcp-footer strong { display: block; color: #1c1c1e; font-size: .84rem; }
-
-    /* ── CTA bar — always visible at bottom ─────────────────── */
-    .ty-cta { flex-shrink: 0; position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 1rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: .55rem; border-radius: 0 0 24px 24px; }
-    .ty-cta-main { display: flex; gap: .55rem; }
-    .ty-cta-main .btn-primary  { flex: 1; }
-    .ty-cta-main .btn-outline  { flex: 1; }
-    .ty-cta-print { background: none; border: none; color: var(--muted); font-size: .8rem; cursor: pointer; padding: .1rem; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
-    .ty-cta-print:hover { color: var(--primary); }
-
-    /* ── Post-order rating ───────────────────────────────────── */
-    .rating-section { padding: .9rem 1.25rem .6rem; border-top: 1px solid var(--border); }
-    .rating-prompt { text-align:center; font-size:.88rem; font-weight:700; color:var(--text); margin:0 0 .6rem; }
-    .star-row { display:flex; justify-content:center; gap:.15rem; margin-bottom:.65rem; }
-    .star-btn { background:none; border:none; font-size:2.1rem; cursor:pointer; color:#d1d5db; line-height:1; padding:.05rem .1rem; transition:color .12s, transform .1s; touch-action:manipulation; }
-    .star-btn.active { color:#f59e0b; }
-    .star-btn:hover { color:#f59e0b; transform:scale(1.15); }
-    .rating-comment { width:100%; resize:none; border:1px solid var(--border); border-radius:9px; padding:.5rem .75rem; font:inherit; font-size:.84rem; color:var(--text); background:var(--bg); box-sizing:border-box; }
-    .rating-comment:focus { outline:none; border-color:var(--primary); }
-    .rating-actions { display:flex; align-items:center; gap:.6rem; margin-top:.65rem; }
-    .rating-actions .btn-primary { flex:1; padding:.6rem; font-size:.88rem; }
-    .rating-skip { background:none; border:none; color:var(--muted); font-size:.82rem; cursor:pointer; padding:.3rem .4rem; text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
-    .rating-skip:hover { color:var(--primary); }
-    .rating-thanks { text-align:center; padding:.9rem 1.25rem; border-top:1px solid var(--border); }
-    .rating-thanks-icon { font-size:1.6rem; display:block; margin-bottom:.25rem; }
-    .rating-thanks p { font-size:.84rem; color:var(--muted); margin:0; }
-
-    /* ── Small-screen overrides (≤ 480px) ───────────────────── */
-    @media (max-width: 480px) {
-      .order-wrap { padding: 1.25rem .9rem 6.5rem; }
-      .order-hero { padding: 2.2rem 1.1rem 2rem; }
-      .step-head { padding: .95rem 1.1rem; }
-      .step-body { padding: 1.1rem 1.1rem; }
-      .step-nav  { padding: .8rem 1.1rem; }
-      .p-dot { width: 32px; height: 32px; font-size: .78rem; }
-      .p-line { margin-top: 15px; }
-      .item-img-wrap { height: clamp(90px, 28vw, 120px); }
-      .type-opt label { padding: .88rem .5rem; min-height: 72px; }
-      .type-opt label strong { font-size: .82rem; }
-      .mobile-bar { padding: .7rem .9rem calc(.7rem + env(safe-area-inset-bottom)); }
-      .mobile-bar-btn { font-size: .93rem; padding: .88rem 1rem; border-radius: 12px; }
-      .cart-drop-items { max-height: 200px; }
+    .land-nav-brand { display: flex; align-items: center; gap: .45rem; font-weight: 800; font-size: 1rem; color: var(--text); text-decoration: none; flex-shrink: 0; }
+    .land-nav-brand span { font-size: 1.3rem; }
+    .land-nav-links { display: flex; align-items: center; gap: .1rem; flex: 1; justify-content: center; }
+    .land-nav-link {
+      color: var(--text); font-size: .875rem; font-weight: 600;
+      text-decoration: none; padding: .42rem .72rem; border-radius: 8px;
+      transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .land-nav-link:hover { background: rgba(123,74,44,.08); color: var(--primary); }
+    .land-nav-link.active { color: var(--primary); background: var(--primary-lt); }
+    .land-nav-order {
+      background: var(--primary); color: #fff; border: none; border-radius: 99px;
+      padding: .55rem 1.25rem; font-weight: 700; font-size: .875rem; cursor: pointer;
+      text-decoration: none; display: inline-block; flex-shrink: 0;
+      transition: background .15s, transform .12s;
+    }
+    .land-nav-order:hover { background: var(--primary-h); transform: translateY(-1px); }
+    .land-nav-burger {
+      display: none; background: none; border: none; cursor: pointer; flex-shrink: 0;
+      padding: .4rem; border-radius: 8px; color: var(--text); font-size: 1.35rem; line-height: 1;
+      transition: background .15s;
+    }
+    .land-nav-burger:hover { background: rgba(123,74,44,.08); }
+    .land-nav-order-mobile { display: none; }
+    @media (max-width: 700px) {
+      .land-nav { padding: .8rem 1.1rem; }
+      .land-nav-links { display: none; }
+      .land-nav-order { display: none; }
+      .land-nav-burger { display: flex; align-items: center; justify-content: center; }
+      .land-nav.nav-open .land-nav-links {
+        display: flex; flex-direction: column; align-items: stretch; gap: .1rem;
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: rgba(255,252,249,.97);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(230,217,206,.6);
+        padding: .55rem .8rem .8rem;
+      }
+      .land-nav.nav-open .land-nav-link { padding: .82rem .85rem; font-size: .95rem; min-height: 44px; display: flex; align-items: center; }
+      .land-nav.nav-open .land-nav-order-mobile {
+        display: block; margin: .4rem .05rem .15rem;
+        text-align: center; border-radius: 99px;
+        background: var(--primary); color: #fff; font-weight: 700; font-size: .9rem;
+        padding: .7rem 1.25rem; text-decoration: none;
+      }
     }
 
-    /* ── Item detail tap / clickable top area ───────────────── */
-    .item-tap {
-      display: block; width: 100%; text-align: left; background: none; border: none;
-      cursor: pointer; padding: 0; font: inherit; color: inherit;
+    /* ── Hero ────────────────────────────────────────────────── */
+    .land-hero {
+      min-height: 100vh;
+      background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 55%, var(--accent) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 7rem 1.5rem 5rem; position: relative; overflow: hidden;
     }
-    .item-tap:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .land-hero.has-banner { background-size: cover; background-position: center; }
+    .land-hero.has-banner::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(150deg, rgba(44,26,14,.82) 0%, rgba(123,74,44,.7) 55%, rgba(201,125,71,.6) 100%);
+    }
+    .land-hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 55% at 80% 15%, rgba(255,200,120,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 10% 85%, rgba(60,20,5,.28) 0%, transparent 55%);
+    }
+    .land-hero-content { position: relative; z-index: 1; max-width: 640px; }
+    .land-hero-emoji {
+      font-size: clamp(2.8rem, 8vw, 4.5rem); line-height: 1; display: block; margin-bottom: .8rem;
+      filter: drop-shadow(0 4px 18px rgba(0,0,0,.3));
+      animation: hero-drop .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes hero-drop   { from { opacity: 0; transform: translateY(-20px) scale(.8); } to { opacity: 1; transform: none; } }
+    @keyframes pageFadeOut { to { opacity: 0; transform: translateY(-8px); } }
+    body.page-exit { animation: pageFadeOut .25s ease forwards; pointer-events: none; }
+    .land-hero-title {
+      font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 900; letter-spacing: -.03em;
+      color: #fff; line-height: 1.06; margin-bottom: .7rem;
+      animation: hero-up .55s ease .15s both;
+    }
+    .land-hero-sub {
+      font-size: clamp(.95rem, 2.5vw, 1.15rem); color: rgba(255,255,255,.78);
+      margin-bottom: 2.2rem; animation: hero-up .55s ease .25s both;
+    }
+    @keyframes hero-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    .land-hero-actions { display: flex; gap: .85rem; justify-content: center; flex-wrap: wrap; animation: hero-up .55s ease .35s both; }
+    .land-btn-primary {
+      background: #fff; color: var(--primary); font-weight: 800; font-size: 1rem;
+      border: none; border-radius: 99px; padding: .9rem 2.2rem; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .land-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.26); }
+    .land-btn-ghost {
+      background: rgba(255,255,255,.14); color: #fff; font-weight: 600; font-size: .95rem;
+      border: 1.5px solid rgba(255,255,255,.4); border-radius: 99px; padding: .85rem 1.8rem;
+      text-decoration: none; display: inline-block; backdrop-filter: blur(6px);
+      transition: background .15s, transform .15s;
+    }
+    .land-btn-ghost:hover { background: rgba(255,255,255,.22); transform: translateY(-2px); }
+    .land-scroll-hint {
+      position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.45); font-size: .78rem; display: flex; flex-direction: column; align-items: center; gap: .3rem; z-index: 1;
+    }
+    .land-scroll-arrow { font-size: 1.15rem; animation: bounce .2s ease infinite alternate; }
+    @keyframes bounce { to { transform: translateY(5px); } }
 
-    /* ── Item detail bottom sheet ────────────────────────────── */
-    .item-sheet-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.52); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-      z-index: 450; align-items: flex-end; justify-content: center;
+    /* ── Section shell ───────────────────────────────────────── */
+    .land-section { padding: 4.5rem 1.5rem; max-width: 1120px; margin: 0 auto; }
+    .land-section-alt { background: var(--surface); }
+    .land-section-alt > .land-section { max-width: 1120px; margin: 0 auto; }
+    #news-section, #about-section {
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
     }
-    .item-sheet-overlay.open { display: flex; animation: sheetFade .22s ease both; }
-    @keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
-    .item-sheet {
-      background: var(--surface); border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto;
-      animation: sheetUp .28s cubic-bezier(.22,.68,0,1.12) both;
-      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    #news-section .land-section, #about-section .land-section {
+      width: 100%;
+      padding-top: 5rem;
+      padding-bottom: 5rem;
     }
-    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .item-sheet-img { width: 100%; height: 220px; object-fit: cover; border-radius: 24px 24px 0 0; display: block; }
-    .item-sheet-img-ph { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; background: var(--primary-lt); font-size: 3.5rem; border-radius: 24px 24px 0 0; }
-    .item-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.2rem 1.3rem .4rem; gap: .75rem; }
-    .item-sheet-close {
-      background: var(--bg); border: 1.5px solid var(--border); border-radius: 99px;
-      width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; color: var(--muted); cursor: pointer; flex-shrink: 0; margin-top: -.1rem;
-      transition: background .14s, color .14s;
+    #news-section .news-card {
+      max-width: 780px;
+      margin: 2.5rem auto 0;
+      padding: 2.8rem 3rem;
+      border-left-width: 5px;
     }
-    .item-sheet-close:hover { background: var(--primary-lt); color: var(--primary); }
-    .item-sheet-cat   { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 700; margin-bottom: .2rem; }
-    .item-sheet-name  { font-size: 1.2rem; font-weight: 900; color: var(--text); line-height: 1.25; letter-spacing: -.02em; }
-    .item-sheet-price { font-size: 1.15rem; font-weight: 800; color: var(--primary); flex-shrink: 0; }
-    .item-sheet-desc  { font-size: .9rem; color: var(--muted); line-height: 1.7; padding: 0 1.3rem .9rem; }
-    .item-sheet-footer { padding: .65rem 1.3rem 0; display: flex; gap: .6rem; align-items: center; }
-    .item-sheet-add   {
-      flex: 1; background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-      color: #fff; border: none; border-radius: 14px; padding: .88rem 1.2rem;
-      font: inherit; font-size: .97rem; font-weight: 700; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(123,74,44,.28); transition: opacity .14s, transform .12s;
-    }
-    .item-sheet-add:hover { opacity: .9; transform: translateY(-1px); }
-    .item-sheet-qty { display: flex; align-items: center; gap: .5rem; }
+    #news-section .news-icon  { font-size: 3.2rem; }
+    #news-section .news-title { font-size: 1.35rem; }
+    #news-section .news-body  { font-size: .97rem; line-height: 1.9; }
+    #about-section .about-icon  { font-size: 4.5rem; margin-bottom: 1.5rem; }
+    #about-section .about-text  { font-size: 1rem; line-height: 2.1; max-width: 600px; margin: 0 auto; }
+    #about-section .section-title { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: .75rem; }
+    .section-eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); font-weight: 700; margin-bottom: .4rem; }
+    .section-title { font-size: clamp(1.4rem, 3.5vw, 1.95rem); font-weight: 900; letter-spacing: -.025em; color: var(--text); margin-bottom: .5rem; line-height: 1.15; }
+    .section-sub { color: var(--muted); font-size: .93rem; max-width: 500px; line-height: 1.7; }
 
-    /* ── Print (fallback if popup blocked) ──────────────────── */
-    @media print {
-      @page { size: auto; margin: 1.5cm; }
-      body > * { display: none !important; }
-      #receipt-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
-      #receipt-modal .modal { display: block !important; max-width: 320px !important; width: 320px !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 auto !important; }
-      .ty-hero, .ty-cta { display: none !important; }
-      .receipt-body { border: none !important; }
-      .rcp-paper { background: #fff !important; padding: 0 !important; font-size: 9pt !important; color: #000 !important; }
+    /* ── Featured items ──────────────────────────────────────── */
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; margin-top: 2rem; }
+    .feat-card { background: var(--surface); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
+    .feat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .feat-card-img {
+      width: 100%; height: clamp(130px, 38vw, 175px); background: var(--primary-lt);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+    }
+    .feat-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
+    .feat-card:hover .feat-card-img img { transform: scale(1.06); }
+    .feat-card-body { padding: 1rem 1.1rem 1.2rem; }
+    .feat-card-cat   { font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); font-weight: 700; margin-bottom: .2rem; }
+    .feat-card-name  { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+    .feat-card-desc  { font-size: .84rem; color: var(--muted); line-height: 1.55; margin-bottom: .6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .feat-card-price { font-size: 1.08rem; font-weight: 800; color: var(--primary); }
+    .feat-see-more { display: inline-flex; align-items: center; gap: .3rem; margin-top: 1.3rem; color: var(--primary); font-weight: 700; font-size: .9rem; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color .15s; }
+    .feat-see-more:hover { border-color: var(--primary); }
+    #featured-empty { display: none; color: var(--muted); font-size: .9rem; margin-top: 1.5rem; }
+
+    /* ── Promo banner ────────────────────────────────────────── */
+    .promo-img { max-width: 480px; width: 100%; border-radius: 14px; margin: 1.2rem auto 1.6rem; display: block; box-shadow: 0 6px 30px rgba(0,0,0,.25); }
+    #promo-section { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); text-align: center; padding: 3.8rem 1.5rem; }
+    .promo-badge { display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); border-radius: 99px; font-size: .73rem; font-weight: 700; padding: .25rem .9rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .8rem; color: #fff; }
+    .promo-title { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; letter-spacing: -.025em; color: #fff; margin-bottom: .5rem; }
+    .promo-body  { font-size: .97rem; color: rgba(255,255,255,.85); max-width: 480px; margin: 0 auto 1.8rem; line-height: 1.7; }
+
+    /* ── What's New ──────────────────────────────────────────── */
+    .news-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 2rem 2.2rem; max-width: 700px; margin: 2rem auto 0; display: flex; flex-direction: column; gap: 0; border-left: 4px solid var(--accent); }
+    .news-card-top { display: flex; gap: 1.5rem; align-items: flex-start; }
+    .news-card-img { width: 100%; border-radius: 10px; margin-top: 1.2rem; max-height: 280px; object-fit: cover; display: block; }
+    .news-icon  { font-size: 2.4rem; flex-shrink: 0; line-height: 1; }
+    .news-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
+    .news-body  { font-size: .9rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── About ───────────────────────────────────────────────── */
+    .about-wrap { max-width: 680px; margin: 0 auto; text-align: center; }
+    .about-icon { font-size: 3rem; display: block; margin-bottom: 1.1rem; line-height: 1; }
+    .about-text { font-size: .97rem; color: var(--muted); line-height: 1.9; }
+
+    /* ── Final CTA ───────────────────────────────────────────── */
+    #cta-section {
+      background: linear-gradient(150deg, #2c1a0e 0%, var(--primary) 60%, var(--accent) 100%);
+      text-align: center; padding: 5.5rem 1.5rem; position: relative; overflow: hidden;
+    }
+    #cta-section::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 50% at 75% 20%, rgba(255,200,120,.15) 0%, transparent 60%);
+    }
+    .cta-inner { position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(1.65rem, 5vw, 2.6rem); font-weight: 900; letter-spacing: -.03em; color: #fff; margin-bottom: .65rem; line-height: 1.1; }
+    .cta-sub   { color: rgba(255,255,255,.72); font-size: .97rem; margin-bottom: 2.2rem; }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    .land-footer { background: #1c110a; color: rgba(255,255,255,.45); text-align: center; padding: 1.75rem 1.5rem; font-size: .8rem; line-height: 1.7; }
+    .land-footer strong { color: rgba(255,255,255,.75); }
+
+    /* ── Mobile ──────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .land-hero { min-height: 85vh; padding: 5rem 1.25rem 4rem; }
+      .land-hero-actions { gap: .65rem; }
+      .land-btn-primary { padding: .82rem 1.8rem; font-size: .95rem; }
+      .land-btn-ghost   { padding: .78rem 1.5rem; font-size: .9rem; }
+      .news-card { padding: 1.4rem 1.3rem; }
+      .news-card-top { gap: 1rem; }
+      .feat-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: .85rem; }
+      .feat-card-body { padding: .85rem .9rem 1rem; }
+      .land-section { padding: 3rem 1.1rem; }
+      .section-title { margin-bottom: .4rem; }
+      .section-eyebrow { font-size: .75rem; }
+    }
+
+    @media (max-width: 400px) {
+      .land-hero { padding-top: 4.5rem; }
+      .feat-grid { grid-template-columns: repeat(2, 1fr); gap: .7rem; }
+      .land-nav { padding: .75rem .9rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── Sticky nav ──────────────────────────────────────────── -->
-<nav class="site-nav" id="order-nav">
-  <button class="nav-home" onclick="goHome()">
-    <span class="n-emoji brand-emoji">🥐</span>
+<!-- ── Nav ─────────────────────────────────────────────────── -->
+<nav class="land-nav" id="land-nav">
+  <a href="/" class="land-nav-brand">
+    <span class="brand-emoji">🥐</span>
     <span class="brand-name">Sweet Crumb Bakery</span>
-  </button>
-  <button class="nav-cart" id="nav-cart-btn" onclick="toggleCartDropdown(event)">
-    🛒 <span id="nav-cart-label">0 items</span>
-  </button>
-  <div class="cart-dropdown" id="cart-dropdown" style="display:none"></div>
+  </a>
+  <div class="land-nav-links" id="land-nav-links">
+    <!-- Populated by buildNav() after sections are shown/hidden -->
+  </div>
+  <a href="order.html" class="land-nav-order">Order Now →</a>
+  <button class="land-nav-burger" id="nav-burger" onclick="toggleNavMenu()" aria-label="Open menu">☰</button>
 </nav>
 
-<!-- ── Hero ───────────────────────────────────────────────── -->
-<div class="order-hero" id="order-hero">
-  <div class="order-hero-content">
-    <h1 class="brand-name">Sweet Crumb Bakery</h1>
-    <p id="hero-tagline">Fresh baked goods — order ahead for pickup or delivery</p>
-  </div>
-</div>
-
-<!-- ── Script-not-configured warning ──────────────────────── -->
-<div id="url-warning-bar" style="display:none;background:#fef3c7;border-bottom:2px solid #f59e0b;padding:.75rem 1.25rem;text-align:center;font-size:.875rem;font-weight:600;color:#92400e">
-  ⚠ Online ordering is not configured yet. Please contact us directly to place your order.
-</div>
-
-<!-- ── Main layout ────────────────────────────────────────── -->
-<div class="order-wrap">
-
-  <!-- ── Form column ──────────────────────────────────────── -->
-  <div class="order-form-col">
-
-    <!-- Progress bar -->
-    <div class="step-progress">
-      <div class="p-step active" data-step="1" onclick="jumpStep(1)">
-        <div class="p-dot">1</div>
-        <div class="p-label">Items</div>
-      </div>
-      <div class="p-line" id="line-1"></div>
-      <div class="p-step inactive" data-step="2" onclick="jumpStep(2)">
-        <div class="p-dot">2</div>
-        <div class="p-label">Details</div>
-      </div>
-      <div class="p-line" id="line-2"></div>
-      <div class="p-step inactive" data-step="3" onclick="jumpStep(3)">
-        <div class="p-dot">3</div>
-        <div class="p-label">Your Info</div>
-      </div>
-      <div class="p-line" id="line-3"></div>
-      <div class="p-step inactive" data-step="4" onclick="jumpStep(4)">
-        <div class="p-dot">4</div>
-        <div class="p-label">Review</div>
-      </div>
-    </div>
-
-    <div class="steps-container">
-
-    <!-- Step 1: Choose items -->
-    <div id="step-1">
-      <div class="step-card">
-        <div class="step-head">
-          <span class="step-num">1</span>
-          <h2>Choose Your Items</h2>
-        </div>
-        <div class="step-body">
-          <div class="cat-pills" id="cat-tabs"></div>
-          <div class="product-grid" id="product-grid"></div>
-        </div>
-        <div class="step-nav">
-          <button class="btn-primary" style="width:auto" id="step1-next" onclick="nextStep()" disabled>Continue →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 2: Order details + payment -->
-    <div id="step-2" style="display:none">
-      <div class="step-card">
-        <div class="step-head">
-          <span class="step-num">2</span>
-          <h2>Pickup / Delivery &amp; Payment</h2>
-        </div>
-        <div class="step-body">
-
-          <!-- Pickup / Delivery -->
-          <div class="type-toggle">
-            <div class="type-opt">
-              <input type="radio" name="orderType" id="type-pickup" value="pickup">
-              <label for="type-pickup">
-                <span class="t-icon">🛍</span>
-                <strong>Pickup</strong>
-                <small>Collect from bakery</small>
-              </label>
-            </div>
-            <div class="type-opt">
-              <input type="radio" name="orderType" id="type-delivery" value="delivery">
-              <label for="type-delivery">
-                <span class="t-icon">🚚</span>
-                <strong>Delivery</strong>
-                <small>We bring it to you</small>
-              </label>
-            </div>
-          </div>
-
-          <div class="dt-grid">
-            <div class="field">
-              <label for="order-date">Date *</label>
-              <input type="date" id="order-date" required>
-            </div>
-            <div class="field">
-              <label for="order-time">Preferred Time *</label>
-              <select id="order-time"></select>
-            </div>
-          </div>
-
-          <div id="delivery-block" style="display:none;margin-top:.1rem">
-            <div class="field">
-              <label for="delivery-addr">Delivery Address *</label>
-              <input type="text" id="delivery-addr" placeholder="Street, Barangay, City">
-            </div>
-          </div>
-
-          <!-- Payment method (revealed after pickup/delivery choice) -->
-          <div id="pay-section">
-            <span class="pay-section-label">Payment Method *</span>
-            <div class="type-toggle" style="margin-bottom:.75rem">
-              <div class="type-opt">
-                <input type="radio" name="paymentMethod" id="pay-cash" value="cash">
-                <label for="pay-cash">
-                  <span class="t-icon">💵</span>
-                  <strong>Cash</strong>
-                  <small>Pay on pickup/delivery</small>
-                </label>
-              </div>
-              <div class="type-opt">
-                <input type="radio" name="paymentMethod" id="pay-bank" value="bank">
-                <label for="pay-bank">
-                  <span class="t-icon">🏦</span>
-                  <strong>Bank</strong>
-                  <small>Transfer</small>
-                </label>
-              </div>
-              <div class="type-opt">
-                <input type="radio" name="paymentMethod" id="pay-qr" value="qr">
-                <label for="pay-qr">
-                  <span class="t-icon">📱</span>
-                  <strong>E-Wallet</strong>
-                  <small>GCash / Maya</small>
-                </label>
-              </div>
-            </div>
-
-            <!-- Payment details (shown based on selection) -->
-            <div id="pay-details"></div>
-
-            <!-- Reference number (shown for bank / qr) -->
-            <div id="pay-ref-block">
-              <div class="field" style="margin-bottom:0">
-                <label for="pay-ref"><span id="pay-ref-label-text">Reference / Transaction Number</span> <span style="font-weight:400;color:#e53e3e">*&nbsp;Required</span></label>
-                <input type="text" id="pay-ref" placeholder="e.g. 1234567890">
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <div class="step-nav">
-          <button class="btn-back" onclick="prevStep()">← Back</button>
-          <button class="btn-primary" style="width:auto" onclick="nextStep()">Continue →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 3: Your details -->
-    <div id="step-3" style="display:none">
-      <div class="step-card">
-        <div class="step-head">
-          <span class="step-num">3</span>
-          <h2>Your Details</h2>
-        </div>
-        <div class="step-body">
-          <div class="field-row">
-            <div class="field">
-              <label for="cust-name">Full Name *</label>
-              <input type="text" id="cust-name" placeholder="Juan dela Cruz" autocomplete="name" maxlength="100">
-            </div>
-            <div class="field">
-              <label for="cust-phone">Phone Number *</label>
-              <input type="tel" id="cust-phone" placeholder="09XX XXX XXXX" autocomplete="tel" maxlength="20">
-            </div>
-          </div>
-          <div class="field">
-            <label for="cust-email">Email <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-            <input type="email" id="cust-email" placeholder="you@example.com" autocomplete="email" maxlength="150">
-          </div>
-          <div class="field">
-            <label for="cust-notes">Special Requests <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-            <textarea id="cust-notes" rows="3" placeholder="Allergies, customisations, gift messages…" maxlength="500"></textarea>
-          </div>
-        </div>
-        <div class="step-nav">
-          <button class="btn-back" onclick="prevStep()">← Back</button>
-          <button class="btn-primary" style="width:auto" onclick="nextStep()">Review Order →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 4: Review & confirm -->
-    <div id="step-4" style="display:none">
-      <div class="step-card">
-        <div class="step-head">
-          <span class="step-num">4</span>
-          <h2>Review Your Order</h2>
-        </div>
-        <div class="step-body" id="review-body"></div>
-        <div class="step-nav">
-          <button class="btn-back" onclick="showStep(1)">← Edit Order</button>
-          <button class="btn-danger" onclick="cancelOrder()">Cancel</button>
-          <button class="btn-primary" style="width:auto" id="place-order-btn" onclick="submitOrder()">Confirm &amp; Place Order</button>
-        </div>
-      </div>
-    </div>
-
-    </div><!-- /steps-container -->
-
-  </div><!-- /order-form-col -->
-
-  <!-- ── Sticky summary ───────────────────────────────────── -->
-  <aside class="order-summary-col">
-    <div class="summary-card">
-      <div class="summary-head">
-        <span>Your Order</span>
-        <span class="s-count" id="cart-count">0 items</span>
-      </div>
-      <div class="summary-items" id="summary-items">
-        <div class="s-empty">No items selected yet.</div>
-      </div>
-      <div class="summary-foot">
-        <div id="summary-totals" style="display:none">
-          <div class="total-row">
-            <span class="t-label">Total</span>
-            <span class="t-val" id="total-amt">₱0.00</span>
-          </div>
-        </div>
-        <button class="btn-primary" id="sidebar-action-btn" disabled>Continue →</button>
-        <button class="btn-outline" id="sidebar-payment-btn" style="width:100%;margin-top:.5rem;display:none" onclick="showStep(4)">📋 Review &amp; Pay</button>
-        <p class="summary-note">We'll confirm by phone or email.</p>
-      </div>
-    </div>
-  </aside>
-
-</div><!-- /order-wrap -->
-
-<!-- ── Mobile floating bar ────────────────────────────────── -->
-<div class="mobile-bar">
-  <button class="mobile-bar-btn" id="mobile-action-btn" disabled>
-    <span class="mb-left">
-      <span id="mb-action-label">Continue →</span>
-      <span class="mb-badge" id="mb-badge">0 items</span>
-    </span>
-    <span class="mb-total" id="mb-total">₱0.00</span>
-  </button>
-</div>
-
-<!-- ── Floating Messenger button ──────────────────────────── -->
-<a class="contact-float" id="contact-float-btn" href="#" target="_blank" rel="noopener noreferrer">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.914 1.38 5.516 3.547 7.227V22l3.234-1.776A10.68 10.68 0 0012 20.487c5.523 0 10-4.145 10-9.244C22 6.145 17.523 2 12 2zm1.024 12.44l-2.55-2.716-4.976 2.716 5.474-5.808 2.612 2.716 4.914-2.716-5.474 5.808z"/></svg>
-  <span id="contact-float-label">Message Us</span>
-</a>
-
-<!-- ── Item detail bottom sheet ──────────────────────────── -->
-<div class="item-sheet-overlay" id="item-sheet-overlay" onclick="if(event.target===this)closeItemSheet()">
-  <div class="item-sheet" id="item-sheet">
-    <div id="sheet-img-wrap"></div>
-    <div class="item-sheet-head">
-      <div>
-        <div class="item-sheet-cat"  id="sheet-cat"></div>
-        <div class="item-sheet-name" id="sheet-name"></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
-        <button class="item-sheet-close" onclick="closeItemSheet()">✕</button>
-        <div class="item-sheet-price" id="sheet-price"></div>
-      </div>
-    </div>
-    <div class="item-sheet-desc" id="sheet-desc"></div>
-    <div class="item-sheet-footer">
-      <button class="item-sheet-add" id="sheet-add-btn" onclick="sheetAddToCart()">Add to Cart</button>
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="land-hero" id="land-hero">
+  <div class="land-hero-content">
+    <span class="land-hero-emoji brand-emoji">🥐</span>
+    <h1 class="land-hero-title brand-name">Sweet Crumb Bakery</h1>
+    <p class="land-hero-sub" id="hero-tagline">Fresh baked goods — order ahead for pickup or delivery</p>
+    <div class="land-hero-actions">
+      <a href="order.html" class="land-btn-primary">Start Your Order</a>
+      <a href="#featured" class="land-btn-ghost">See Today's Picks ↓</a>
     </div>
   </div>
-</div>
+  <div class="land-scroll-hint">
+    <span>Scroll to explore</span>
+    <span class="land-scroll-arrow">↓</span>
+  </div>
+</section>
 
-<!-- ── Thank you / Receipt modal ─────────────────────────── -->
-<div class="modal-overlay" id="receipt-modal" style="display:none">
-  <div class="modal">
-    <div class="ty-hero">
-      <div class="ty-ring"><span class="ty-check-icon">✓</span></div>
-      <h2 class="ty-title" id="ty-title">Thank you!</h2>
-      <p class="ty-sub" id="ty-sub">Your order has been placed.</p>
-      <span class="ty-order-id" id="ty-order-id"></span>
-    </div>
-    <div class="receipt-body" id="receipt-body"></div>
+<!-- ── Featured Today ───────────────────────────────────────── -->
+<section id="featured">
+  <div class="land-section">
+    <div class="section-eyebrow">Today's Picks</div>
+    <h2 class="section-title">Fresh From the Oven</h2>
+    <p class="section-sub">Handcrafted every morning — order ahead to make sure yours is ready.</p>
+    <div class="feat-grid" id="feat-grid"></div>
+    <p id="featured-empty">Menu items coming soon — check back later!</p>
+    <a href="order.html" class="feat-see-more" id="feat-see-more" style="display:none">See full menu &amp; order →</a>
+  </div>
+</section>
 
-    <!-- Rating section — shown once after order placed -->
-    <div class="rating-section" id="rating-section" style="display:none">
-      <p class="rating-prompt">How was your experience?</p>
-      <div class="star-row" id="star-row">
-        <button class="star-btn" data-r="1" type="button">★</button>
-        <button class="star-btn" data-r="2" type="button">★</button>
-        <button class="star-btn" data-r="3" type="button">★</button>
-        <button class="star-btn" data-r="4" type="button">★</button>
-        <button class="star-btn" data-r="5" type="button">★</button>
-      </div>
-      <textarea class="rating-comment" id="rating-comment" rows="2" placeholder="Leave a comment… (optional)"></textarea>
-      <div class="rating-actions">
-        <button class="btn-primary" id="rating-submit-btn" type="button">Submit Review</button>
-        <button class="rating-skip" type="button" onclick="skipRating()">Skip</button>
-      </div>
-    </div>
-    <div class="rating-thanks" id="rating-thanks" style="display:none">
-      <span class="rating-thanks-icon">🙏</span>
-      <p>Thank you for your feedback!</p>
-    </div>
+<!-- ── Promo Banner ─────────────────────────────────────────── -->
+<section id="promo-section" style="display:none">
+  <div class="promo-badge">Limited Offer</div>
+  <div class="promo-title" id="promo-title"></div>
+  <img id="promo-img" src="" alt="" class="promo-img" style="display:none">
+  <div class="promo-body"  id="promo-body"></div>
+  <a href="order.html" class="land-btn-primary" style="font-size:.95rem;padding:.8rem 2rem;margin-top:1.6rem;display:inline-block">Order Now →</a>
+</section>
 
-    <div class="ty-cta">
-      <div class="ty-cta-main">
-        <button class="btn-primary" id="order-again-btn">Order Again</button>
-        <button class="btn-outline" id="done-btn">Maybe Next Time</button>
+<!-- ── What's New ───────────────────────────────────────────── -->
+<section id="news-section" style="display:none" class="land-section-alt">
+  <div class="land-section">
+    <div class="section-eyebrow">What's New</div>
+    <h2 class="section-title">Fresh Announcements</h2>
+    <div class="news-card">
+      <div class="news-card-top">
+        <div class="news-icon">🆕</div>
+        <div>
+          <div class="news-title" id="news-title"></div>
+          <div class="news-body"  id="news-body"></div>
+        </div>
       </div>
-      <button class="ty-cta-print" id="print-btn">🖨 Print / Save a copy of this receipt</button>
+      <img id="news-img" src="" alt="" class="news-card-img" style="display:none">
     </div>
   </div>
-</div>
+</section>
 
-<div class="toast-bar" id="toast-bar"></div>
+<!-- ── About ────────────────────────────────────────────────── -->
+<section id="about-section" style="display:none">
+  <div class="land-section">
+    <div class="about-wrap">
+      <span class="about-icon brand-emoji">🥐</span>
+      <div class="section-eyebrow" style="text-align:center">About Us</div>
+      <h2 class="section-title" style="text-align:center">Our Story</h2>
+      <p class="about-text" id="about-text"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ────────────────────────────────────────────── -->
+<section id="cta-section">
+  <div class="cta-inner">
+    <div class="cta-title">Ready to treat yourself?</div>
+    <div class="cta-sub">Place your order now — we'll have it fresh and ready for you.</div>
+    <a href="order.html" class="land-btn-primary">Start Your Order</a>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer class="land-footer">
+  <div><strong class="brand-name">Sweet Crumb Bakery</strong></div>
+  <div id="footer-contact"></div>
+  <div style="margin-top:.4rem;opacity:.5">© <span id="footer-year"></span> All rights reserved.</div>
+</footer>
 
 <script>
 var PLACEHOLDER = 'PASTE_YOUR_SCRIPT_URL_HERE'
-var ACTIVE_URL  = localStorage.getItem('scb_script_url') || SCRIPT_URL
+var ACTIVE_URL  = localStorage.getItem('scb_script_url') || (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : PLACEHOLDER)
+var MENU = []
 
-var MENU        = []
-var CATS        = ['All']
-var activeCat   = 'All'
-var cart        = {}
-var currentStep = 1
-var maxStep     = 1   // highest step ever reached this session
-
-var catTabsEl       = document.getElementById('cat-tabs')
-var productGridEl   = document.getElementById('product-grid')
-var summaryItemsEl  = document.getElementById('summary-items')
-var summaryTotals   = document.getElementById('summary-totals')
-var totalAmtEl      = document.getElementById('total-amt')
-var cartCountEl     = document.getElementById('cart-count')
-var placeOrderBtn   = document.getElementById('place-order-btn')
-var sidebarActionEl = document.getElementById('sidebar-action-btn')
-var mobileActionEl  = document.getElementById('mobile-action-btn')
-var mbBadgeEl       = document.getElementById('mb-badge')
-var mbTotalEl       = document.getElementById('mb-total')
-var mbActionLabel   = document.getElementById('mb-action-label')
-var deliveryBlock   = document.getElementById('delivery-block')
-var receiptModal    = document.getElementById('receipt-modal')
-var dateInput       = document.getElementById('order-date')
-var timeSelect      = document.getElementById('order-time')
-
-// ── Payment settings ───────────────────────────────────────
-function getPaymentSettings() {
+function getLandingSettings() {
   try {
-    var stored = JSON.parse(localStorage.getItem('scb_payment'))
+    var stored = JSON.parse(localStorage.getItem('scb_landing'))
     if (stored && Object.keys(stored).length) return stored
   } catch(e) {}
-  // Fall back to bundled settings published by admin (for Netlify customers)
-  if (typeof BUNDLED_PAYMENT !== 'undefined' && BUNDLED_PAYMENT && Object.keys(BUNDLED_PAYMENT).length) {
-    return BUNDLED_PAYMENT
+  if (typeof BUNDLED_LANDING !== 'undefined' && BUNDLED_LANDING && Object.keys(BUNDLED_LANDING).length) {
+    return BUNDLED_LANDING
   }
   return {}
 }
-
-function applyContactButton() {
-  var s   = getPaymentSettings()
-  var btn = document.getElementById('contact-float-btn')
-  if (!btn) return
-  var msUrl = safeUrl(s.messenger)
-  if (msUrl) {
-    btn.href = msUrl
-    document.getElementById('contact-float-label').textContent = s.contact_label || 'Message Us'
-    btn.classList.add('visible')
-  } else {
-    btn.classList.remove('visible')
-  }
-}
-
-function updatePaymentDisplay() {
-  var checked  = document.querySelector('input[name="paymentMethod"]:checked')
-  var detailEl = document.getElementById('pay-details')
-  var refBlock = document.getElementById('pay-ref-block')
-  if (!checked) {
-    if (detailEl) detailEl.innerHTML = ''
-    if (refBlock) refBlock.classList.remove('ref-visible')
-    return
-  }
-  var method   = checked.value
-  var settings = getPaymentSettings()
-  var labelEl  = document.getElementById('pay-ref-label-text')
-  var refInput = document.getElementById('pay-ref')
-
-  var showRef = (method === 'bank' || method === 'qr')
-  var wasHidden = !refBlock.classList.contains('ref-visible')
-  refBlock.classList.toggle('ref-visible', showRef)
-
-  // Scroll the step-body so the ref field is fully visible, then focus it
-  if (showRef && wasHidden) {
-    setTimeout(function() {
-      var stepBody = document.querySelector('#step-2 .step-body')
-      if (stepBody && refBlock) {
-        var bodyRect  = stepBody.getBoundingClientRect()
-        var blockRect = refBlock.getBoundingClientRect()
-        if (blockRect.bottom > bodyRect.bottom) {
-          stepBody.scrollBy({ top: blockRect.bottom - bodyRect.bottom + 24, behavior: 'smooth' })
-        }
-      }
-      if (refInput) setTimeout(function() { refInput.focus({ preventScroll: true }) }, 120)
-    }, 60)
-  }
-
-  // Update label + placeholder to name the specific method
-  if (method === 'bank') {
-    if (labelEl) labelEl.textContent = 'Bank Reference / Transaction Number'
-    if (refInput) refInput.placeholder = 'e.g. 20250609123456'
-  } else if (method === 'qr') {
-    var walletName = (settings && settings.qr_label) ? settings.qr_label : 'GCash / Maya'
-    if (labelEl) labelEl.textContent = walletName + ' Reference Number'
-    if (refInput) refInput.placeholder = 'e.g. 1234567890'
-  }
-
-  // Fade out then swap content
-  detailEl.classList.add('pay-fading')
-  setTimeout(function() {
-    var messengerBtn = messengerLink(settings)
-    if (method === 'cash') {
-      var orderType = document.querySelector('input[name="orderType"]:checked')
-      var typeLabel = (orderType && orderType.value === 'delivery') ? 'delivery' : 'pickup'
-      detailEl.innerHTML =
-        '<div class="pay-info-box" style="display:flex;align-items:flex-start;gap:.55rem">' +
-        '<span style="font-size:1.3rem;flex-shrink:0">💵</span>' +
-        '<span><strong style="color:var(--primary)">Pay on ' + typeLabel + '</strong> — no advance payment needed. Have the exact amount ready when your order arrives.' +
-        (messengerBtn ? '<div style="margin-top:.65rem">' + messengerBtn + '</div>' : '') +
-        '</span></div>'
-    } else if (method === 'bank') {
-      if (!settings.bank_name && !settings.bank_acct) {
-        detailEl.innerHTML = '<div class="pay-not-configured">⚠ Bank details not set up yet — contact us for payment info.' + messengerBtn + '</div>'
-      } else {
-        detailEl.innerHTML =
-          '<div class="pay-info-box">' +
-          '<span style="font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase">Send payment to</span><br>' +
-          '<strong>' + escHtml(settings.bank_name || '') + '</strong><br>' +
-          'Account No: <strong>' + escHtml(settings.bank_acct || '') + '</strong><br>' +
-          (settings.bank_acct_name ? 'Account Name: ' + escHtml(settings.bank_acct_name) : '') +
-          (messengerBtn ? '<div style="margin-top:.65rem">' + messengerBtn + '</div>' : '') +
-          '</div>'
-      }
-    } else if (method === 'qr') {
-      if (!settings.qr_image) {
-        detailEl.innerHTML = '<div class="pay-not-configured">⚠ QR code not set up yet — contact us for payment info.' + messengerBtn + '</div>'
-      } else {
-        detailEl.innerHTML =
-          '<div class="pay-qr-wrap">' +
-          (settings.qr_label ? '<div class="pay-qr-label">' + escHtml(settings.qr_label) + '</div>' : '') +
-          '<img src="' + escHtml(settings.qr_image) + '" alt="Payment QR Code">' +
-          '<div class="pay-qr-hint">Scan or screenshot the QR code to pay, then enter your reference number below.</div>' +
-          messengerBtn +
-          '</div>'
-      }
-    }
-    detailEl.classList.remove('pay-fading')
-  }, 160)
-}
-
-function messengerLink(settings) {
-  if (!settings || !settings.messenger) return ''
-  var label = settings.contact_label || 'Message us on Messenger'
-  var msUrl = safeUrl(settings.messenger)
-  if (!msUrl) return ''
-  return '<a href="' + escHtml(msUrl) + '" target="_blank" rel="noopener noreferrer" class="messenger-btn" style="width:100%;justify-content:center;font-size:.86rem;padding:.6rem 1rem;border-radius:10px">' +
-    '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.914 1.38 5.516 3.547 7.227V22l3.234-1.776A10.68 10.68 0 0012 20.487c5.523 0 10-4.145 10-9.244C22 6.145 17.523 2 12 2zm1.024 12.44l-2.55-2.716-4.976 2.716 5.474-5.808 2.612 2.716 4.914-2.716-5.474 5.808z"/></svg>' +
-    escHtml(label) +
-  '</a>'
-}
-
-document.querySelectorAll('input[name="paymentMethod"]').forEach(function(r) {
-  r.addEventListener('change', updatePaymentDisplay)
-})
-
-// ── Step navigation ────────────────────────────────────────
-function showStep(n) {
-  currentStep = n
-  if (n > maxStep) maxStep = n
-  for (var i = 1; i <= 4; i++) {
-    var p = document.getElementById('step-' + i)
-    if (p) p.style.display = (i === n) ? 'block' : 'none'
-  }
-  if (n === 4) renderReview()
-  updateProgress()
-}
-
-function nextStep() {
-  if (currentStep === 1) {
-    if (Object.keys(cart).length === 0) { alert('Please add at least one item to continue.'); return }
-    updatePaymentDisplay()
-    showStep(2)
-  } else if (currentStep === 2) {
-    var otEl = document.querySelector('input[name="orderType"]:checked')
-    if (!otEl) { alert('Please select Pickup or Delivery.'); return }
-    if (!dateInput.value) { alert('Please select a date.'); return }
-    var type = otEl.value
-    if (type === 'delivery' && !document.getElementById('delivery-addr').value.trim()) {
-      alert('Please enter a delivery address.'); return
-    }
-    var pmEl = document.querySelector('input[name="paymentMethod"]:checked')
-    if (!pmEl) { alert('Please select a payment method.'); return }
-    var pm = pmEl.value
-    if ((pm === 'bank' || pm === 'qr') && !document.getElementById('pay-ref').value.trim()) {
-      alert('Please enter your reference / transaction number for ' + (pm === 'bank' ? 'bank transfer' : 'e-wallet') + ' payment.'); return
-    }
-    showStep(3)
-  } else if (currentStep === 3) {
-    var n = document.getElementById('cust-name').value.trim()
-    var p = document.getElementById('cust-phone').value.trim()
-    var e = document.getElementById('cust-email').value.trim()
-    if (!n) { alert('Please enter your full name.'); return }
-    if (!p) { alert('Please enter your phone number.'); return }
-    if (!/^[0-9+\-\s()]{7,20}$/.test(p)) { alert('Please enter a valid phone number (digits only, 7–20 characters).'); return }
-    if (e && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { alert('Please enter a valid email address.'); return }
-    showStep(4)
-  }
-}
-
-function prevStep() { if (currentStep > 1) showStep(currentStep - 1) }
-
-function jumpStep(n) { if (n <= maxStep) showStep(n) }
-
-// ── Cart dropdown ──────────────────────────────────────────
-function toggleCartDropdown(e) {
-  e && e.stopPropagation()
-  var drop = document.getElementById('cart-dropdown')
-  var btn  = document.getElementById('nav-cart-btn')
-  if (drop.style.display === 'none' || !drop.style.display) {
-    renderCartDropdown()
-    drop.style.display = 'block'
-    btn.classList.add('open')
-  } else {
-    closeCartDropdown()
-  }
-}
-
-var _toastTimer = null
-function showToast(msg) {
-  var el = document.getElementById('toast-bar')
-  if (!el) return
-  el.textContent = msg
-  el.classList.add('show')
-  clearTimeout(_toastTimer)
-  _toastTimer = setTimeout(function() { el.classList.remove('show') }, 2500)
-}
-
-function clearCartFromDropdown() {
-  var foot = document.querySelector('#cart-dropdown .cart-drop-foot')
-  if (!foot) return
-  foot.innerHTML =
-    '<div class="cart-drop-confirm">' +
-      '<p>Remove all items?</p>' +
-      '<div style="display:flex;gap:.45rem">' +
-        '<button class="btn-outline btn-sm" style="flex:1;padding:.52rem" onclick="cancelClearCart()">Keep</button>' +
-        '<button class="btn-primary btn-sm" style="flex:1;padding:.52rem;background:var(--danger);border-color:var(--danger);box-shadow:none" onclick="doClearCart()">Yes, clear</button>' +
-      '</div>' +
-    '</div>'
-}
-
-function cancelClearCart() {
-  renderCartDropdown()
-}
-
-function doClearCart() {
-  cart = {}
-  maxStep = 1
-  closeCartDropdown()
-  showStep(1)
-  renderGrid()
-  updateSummary()
-  saveDraft()
-  showToast('Cart cleared')
-}
-
-function closeCartDropdown() {
-  var drop = document.getElementById('cart-dropdown')
-  var btn  = document.getElementById('nav-cart-btn')
-  if (drop) drop.style.display = 'none'
-  if (btn)  btn.classList.remove('open')
-}
-
-function renderCartDropdown() {
-  var items = Object.entries(cart).map(function(entry) {
-    var item = MENU.find(function(m) { return m.id === parseInt(entry[0], 10) })
-    if (!item) return null
-    return { name: item.name, price: item.price, qty: parseInt(entry[1], 10) }
-  }).filter(Boolean)
-  var total = items.reduce(function(s, i) { return s + i.price * i.qty }, 0)
-  var totalQty = items.reduce(function(s, i) { return s + i.qty }, 0)
-
-  var rows = items.map(function(i) {
-    return '<div class="cart-drop-row">' +
-      '<span class="cart-drop-qty">' + i.qty + '×</span>' +
-      '<span class="cart-drop-name">' + escHtml(i.name) + '</span>' +
-      '<span class="cart-drop-price">₱' + (i.price * i.qty).toFixed(2) + '</span>' +
-    '</div>'
-  }).join('')
-
-  document.getElementById('cart-dropdown').innerHTML =
-    '<div class="cart-drop-head">' +
-      '<span>🛒 Your Order (' + totalQty + ' item' + (totalQty !== 1 ? 's' : '') + ')</span>' +
-      '<button class="cart-drop-close" onclick="closeCartDropdown()">✕</button>' +
-    '</div>' +
-    '<div class="cart-drop-items">' + rows + '</div>' +
-    '<div class="cart-drop-foot">' +
-      '<div class="cart-drop-total"><span>Total</span><span>₱' + total.toFixed(2) + '</span></div>' +
-      '<div class="cart-drop-actions">' +
-        '<button class="btn-outline" style="color:var(--danger);border-color:var(--danger);flex:0 0 auto;padding:.5rem .75rem;font-size:.8rem" onclick="clearCartFromDropdown()" title="Clear cart">🗑</button>' +
-        '<button class="btn-outline" onclick="closeCartDropdown();showStep(1)" style="flex:1">Edit</button>' +
-        '<button class="btn-primary" onclick="closeCartDropdown();' + (currentStep === 1 ? 'nextStep()' : currentStep === 4 ? 'submitOrder()' : 'showStep(' + currentStep + ')') + '" style="flex:2">' + (currentStep === 4 ? 'Place Order' : 'Continue →') + '</button>' +
-      '</div>' +
-    '</div>'
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-  var drop = document.getElementById('cart-dropdown')
-  var btn  = document.getElementById('nav-cart-btn')
-  // Ignore clicks on elements that were removed from the DOM mid-handler (e.g. after innerHTML swap)
-  if (!document.contains(e.target)) return
-  if (drop && drop.style.display !== 'none' && !drop.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-    closeCartDropdown()
-  }
-})
-
-function goHome() {
-  if (Object.keys(cart).length === 0 && currentStep === 1) {
-    window.location.href = 'landing.html'
-    return
-  }
-  if (!confirm('Leave this page? Your current selections will be cleared.')) return
-  clearDraft()
-  window.location.href = 'landing.html'
-}
-
-function cancelOrder(skipConfirm) {
-  if (!skipConfirm && !confirm('Cancel this order and start over?')) return
-  maxStep = 1
-  Object.keys(cart).forEach(function(k) { delete cart[k] })
-  document.getElementById('cust-name').value     = ''
-  document.getElementById('cust-phone').value    = ''
-  document.getElementById('cust-email').value    = ''
-  document.getElementById('cust-notes').value    = ''
-  document.getElementById('delivery-addr').value = ''
-  document.getElementById('pay-ref').value       = ''
-  dateInput.value = ''
-  document.querySelectorAll('input[name="orderType"]').forEach(function(r) { r.checked = false })
-  document.querySelectorAll('input[name="paymentMethod"]').forEach(function(r) { r.checked = false })
-  deliveryBlock.style.display = 'none'
-  document.getElementById('pay-section').classList.remove('pay-visible')
-  document.getElementById('pay-details').innerHTML  = ''
-  document.getElementById('pay-ref-block').classList.remove('ref-visible')
-  renderGrid()
-  updateSummary()
-  showStep(1)
-}
-
-function renderReview() {
-  var items = Object.entries(cart).map(function(entry) {
-    var item = MENU.find(function(m) { return m.id === parseInt(entry[0], 10) })
-    if (!item) return null
-    return { name: item.name, price: item.price, qty: parseInt(entry[1], 10) }
-  }).filter(Boolean)
-  var total   = items.reduce(function(s, i) { return s + i.price * i.qty }, 0)
-  var type    = (document.querySelector('input[name="orderType"]:checked') || {}).value || ''
-  var payment = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || ''
-  var payRef  = document.getElementById('pay-ref').value.trim()
-  var date    = dateInput.value
-  var time    = timeSelect.value
-  var address = document.getElementById('delivery-addr').value.trim()
-  var name    = document.getElementById('cust-name').value.trim()
-  var phone   = document.getElementById('cust-phone').value.trim()
-  var email   = document.getElementById('cust-email').value.trim()
-  var notes   = document.getElementById('cust-notes').value.trim()
-  var settings = getPaymentSettings()
-
-  var payLabel = payment === 'cash' ? '💵 Cash' : payment === 'bank' ? '🏦 Bank Transfer' : '📱 E-Wallet (GCash/Maya)'
-  var payExtra = ''
-  if (payment === 'bank' && settings.bank_name) payExtra = ' — ' + settings.bank_name
-  if (payment === 'qr'   && settings.qr_label)  payExtra = ' — ' + settings.qr_label
-
-  // Payment confirm block
-  var payConfirmHtml = ''
-  if (payment === 'cash') {
-    payConfirmHtml = '<div class="pay-cash-note">💵 Payment due on ' + (type === 'pickup' ? 'pickup' : 'delivery') + ' — no advance payment needed.</div>'
-  } else {
-    var detailLines = ''
-    if (payment === 'bank') {
-      detailLines = (settings.bank_name     ? '<strong>' + escHtml(settings.bank_name) + '</strong><br>' : '') +
-                    (settings.bank_acct     ? 'Account No: <strong>' + escHtml(settings.bank_acct) + '</strong><br>' : '') +
-                    (settings.bank_acct_name ? 'Account Name: ' + escHtml(settings.bank_acct_name) : '')
-    } else {
-      detailLines = (settings.qr_label ? '<strong>' + escHtml(settings.qr_label) + '</strong>' : 'E-Wallet / QR Code')
-    }
-    payConfirmHtml =
-      '<div class="pay-confirm-box">' +
-        '<div class="pcb-title">⚠ Payment Required Before Placing Order</div>' +
-        '<div class="pcb-details">' +
-          'Please send <strong>₱' + total.toFixed(2) + '</strong> via ' + payLabel + ' to:<br>' +
-          detailLines +
-          (payRef ? '<br>Your ref: <strong>' + escHtml(payRef) + '</strong>' : '') +
-          (settings.messenger ? '<br>' + messengerLink(settings) : '') +
-        '</div>' +
-        '<label class="pay-confirm-check">' +
-          '<input type="checkbox" id="pay-confirmed-chk" onchange="updatePlaceOrderBtn()">' +
-          '<span>I confirm that I have already sent the payment of <strong>₱' + total.toFixed(2) + '</strong> and will provide the reference number to the bakery.</span>' +
-        '</label>' +
-      '</div>'
-  }
-
-  document.getElementById('review-body').innerHTML =
-    '<div class="review-grid">' +
-      '<div class="review-col-left">' +
-        '<div class="review-block">' +
-          '<h4>Items</h4>' +
-          items.map(function(i) {
-            return '<div class="review-row"><span>' + i.qty + '× ' + escHtml(i.name) + '</span><span>₱' + (i.price * i.qty).toFixed(2) + '</span></div>'
-          }).join('') +
-          '<div class="review-total"><span>Total</span><span>₱' + total.toFixed(2) + '</span></div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="review-col-right">' +
-        '<div class="review-block">' +
-          '<h4>Order Details</h4>' +
-          '<div class="review-meta">' +
-            (type === 'pickup' ? '🛍 Pickup' : '🚚 Delivery') +
-            (date ? '<br>📅 ' + fmtDate(date) + ' at ' + time : '') +
-            (address ? '<br>📍 ' + escHtml(address) : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="review-block">' +
-          '<h4>Payment</h4>' +
-          '<div class="review-meta">' +
-            payLabel + escHtml(payExtra) +
-            (payRef ? '<br>Ref: ' + escHtml(payRef) : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="review-block">' +
-          '<h4>Contact</h4>' +
-          '<div class="review-meta">' +
-            escHtml(name) + '<br>' + escHtml(phone) +
-            (email ? '<br>' + escHtml(email) : '') +
-            (notes ? '<br><em>Note: ' + escHtml(notes) + '</em>' : '') +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    (payConfirmHtml ? '<div class="review-confirm-wrap">' + payConfirmHtml + '</div>' : '')
-
-  updatePlaceOrderBtn()
-}
-
-function updatePlaceOrderBtn() {
-  var payment = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || ''
-  var chk     = document.getElementById('pay-confirmed-chk')
-  var needsConfirm = (payment === 'bank' || payment === 'qr')
-  var confirmed    = !needsConfirm || (chk && chk.checked)
-  placeOrderBtn.disabled   = !confirmed
-  sidebarActionEl.disabled = !confirmed
-  mobileActionEl.disabled  = !confirmed
-}
-
-function updateProgress() {
-  document.querySelectorAll('.p-step').forEach(function(el) {
-    var s = parseInt(el.dataset.step)
-    el.className = 'p-step ' + (s === currentStep ? 'active' : s <= maxStep ? 'done' : 'inactive')
-  })
-  document.getElementById('line-1').classList.toggle('done', maxStep > 1)
-  document.getElementById('line-2').classList.toggle('done', maxStep > 2)
-  document.getElementById('line-3').classList.toggle('done', maxStep > 3)
-
-  // Nav cart badge
-  var navCart  = document.getElementById('nav-cart-btn')
-  var hasItems = Object.keys(cart).length > 0
-  navCart.classList.toggle('visible', hasItems)
-  if (hasItems) {
-    var qty = Object.values(cart).reduce(function(s, q) { return s + q }, 0)
-    document.getElementById('nav-cart-label').textContent = qty + ' item' + (qty !== 1 ? 's' : '')
-  }
-
-  if (currentStep === 4) {
-    sidebarActionEl.textContent = 'Place Order'
-    sidebarActionEl.onclick     = submitOrder
-    mbActionLabel.textContent   = 'Place Order'
-    mobileActionEl.onclick      = submitOrder
-  } else {
-    sidebarActionEl.textContent = 'Continue →'
-    sidebarActionEl.onclick     = nextStep
-    mbActionLabel.textContent   = 'Continue →'
-    mobileActionEl.onclick      = nextStep
-  }
-
-}
-
-// ── Load menu ──────────────────────────────────────────────
-function loadMenu() {
-  catTabsEl.innerHTML = ''
-  try { MENU = JSON.parse(localStorage.getItem('scb_menu')) || [] } catch(e) { MENU = [] }
-  if (!MENU.length && typeof BUNDLED_MENU !== 'undefined' && BUNDLED_MENU.length) MENU = BUNDLED_MENU.slice()
-  CATS = ['All'].concat(MENU.reduce(function(acc, i) {
-    if (acc.indexOf(i.cat) === -1) acc.push(i.cat); return acc
-  }, []))
-  if (MENU.length === 0) {
-    productGridEl.innerHTML = '<p style="color:var(--muted);font-size:.88rem;padding:.5rem 0">No items yet — check back soon!</p>'
-  } else { renderTabs(); renderGrid() }
-}
-
-function renderTabs() {
-  catTabsEl.innerHTML = ''
-  CATS.forEach(function(cat) {
-    var btn = document.createElement('button')
-    btn.className = 'cat-pill' + (cat === activeCat ? ' active' : '')
-    btn.textContent = cat
-    btn.addEventListener('click', function() { activeCat = cat; renderTabs(); renderGrid() })
-    catTabsEl.appendChild(btn)
-  })
-}
-
-function renderGrid() {
-  productGridEl.innerHTML = ''
-  var items = activeCat === 'All' ? MENU : MENU.filter(function(i) { return i.cat === activeCat })
-  if (!items.length) { productGridEl.innerHTML = '<p style="color:var(--muted);font-size:.88rem">No items in this category.</p>'; return }
-  items.forEach(function(item) {
-    var qty = cart[item.id] || 0
-    var card = document.createElement('div')
-    card.className = 'product-card' + (qty > 0 ? ' has-qty' : '')
-    card.id = 'card-' + item.id
-    var imgSrc     = safeUrl(item.img)
-    var imgContent = imgSrc
-      ? '<img src="' + escHtml(imgSrc) + '" alt="' + escHtml(item.name) + '" onerror="this.style.display=\'none\'">'
-      : '<div class="item-ph brand-emoji">🥐</div>'
-    var sid = String(item.id)
-    card.innerHTML =
-      '<button class="item-tap" onclick="openItemSheet(' + sid + ')" aria-label="View details for ' + escHtml(item.name) + '">' +
-        '<div class="item-img-wrap">' + imgContent +
-          '<div class="item-qty-badge" id="badge-' + item.id + '">' + (qty || '') + '</div>' +
-        '</div>' +
-        '<div style="padding:.7rem .8rem .1rem;text-align:left">' +
-          '<div class="item-name">' + escHtml(item.name) + '</div>' +
-          '<div class="item-desc">'  + escHtml(item.desc || '') + '</div>' +
-        '</div>' +
-      '</button>' +
-      '<div class="item-info" style="padding-top:0">' +
-        '<div class="item-footer">' +
-          '<div class="item-price">₱' + item.price.toFixed(2) + '</div>' +
-          '<button class="add-to-cart-btn" data-id="' + item.id + '" title="Add to cart">' +
-            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
-              '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>' +
-              '<path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/>' +
-            '</svg>' +
-          '</button>' +
-        '</div>' +
-        '<div class="item-added-bar">' +
-          '<span class="item-in-cart">✓ In cart · <b id="cart-qty-' + item.id + '">' + (qty || '') + '</b></span>' +
-          '<button class="item-edit-btn" data-id="' + item.id + '">Edit</button>' +
-        '</div>' +
-        '<div class="qty-ctrl">' +
-          '<button class="qty-btn" data-id="' + item.id + '" data-d="-1">−</button>' +
-          '<span class="qty-display" id="qty-' + item.id + '">' + qty + '</span>' +
-          '<button class="qty-btn" data-id="' + item.id + '" data-d="1">+</button>' +
-          '<button class="qty-done-btn" data-id="' + item.id + '">Done</button>' +
-        '</div>' +
-      '</div>'
-    productGridEl.appendChild(card)
-  })
-}
-
-function updateCardUI(id) {
-  var qty  = cart[id] || 0
-  var qEl  = document.getElementById('qty-' + id)
-  var cqEl = document.getElementById('cart-qty-' + id)
-  var bEl  = document.getElementById('badge-' + id)
-  var cEl  = document.getElementById('card-' + id)
-  if (qEl)  qEl.textContent  = qty
-  if (cqEl) cqEl.textContent = qty || ''
-  if (bEl)  bEl.textContent  = qty || ''
-  if (cEl) {
-    cEl.classList.toggle('has-qty', qty > 0)
-    if (qty === 0) cEl.classList.remove('is-editing')
-  }
-}
-
-productGridEl.addEventListener('click', function(e) {
-  // Add to Cart
-  var addBtn = e.target.closest('.add-to-cart-btn')
-  if (addBtn) {
-    var id = addBtn.dataset.id
-    cart[id] = (cart[id] || 0) + 1
-    updateCardUI(id)
-    var cEl = document.getElementById('card-' + id)
-    if (cEl) { cEl.classList.add('just-added'); setTimeout(function(){ cEl.classList.remove('just-added') }, 350) }
-    updateSummary()
-    return
-  }
-  // Edit button → open qty controls
-  var editBtn = e.target.closest('.item-edit-btn')
-  if (editBtn) {
-    var cEl = document.getElementById('card-' + editBtn.dataset.id)
-    if (cEl) cEl.classList.add('is-editing')
-    return
-  }
-  // Done button → collapse back to added bar
-  var doneBtn = e.target.closest('.qty-done-btn')
-  if (doneBtn) {
-    var cEl = document.getElementById('card-' + doneBtn.dataset.id)
-    if (cEl) cEl.classList.remove('is-editing')
-    return
-  }
-  // Qty +/−
-  var btn = e.target.closest('.qty-btn')
-  if (!btn) return
-  var id = btn.dataset.id; var d = parseInt(btn.dataset.d, 10)
-  cart[id] = Math.max(0, (cart[id] || 0) + d)
-  if (cart[id] === 0) delete cart[id]
-  updateCardUI(id)
-  updateSummary()
-})
-
-function adjSidebarQty(id, delta) {
-  cart[id] = Math.max(0, (cart[id] || 0) + delta)
-  if (cart[id] === 0) delete cart[id]
-  updateCardUI(id)
-  updateSummary()
-}
-
-function updateSummary() {
-  var items = Object.entries(cart).map(function(entry) {
-    var item = MENU.find(function(m) { return m.id === parseInt(entry[0], 10) })
-    return { id: entry[0], name: item.name, price: item.price, qty: parseInt(entry[1], 10) }
-  })
-  var total = items.reduce(function(s, i) { return s + i.price * i.qty }, 0)
-  var totalQty = items.reduce(function(s, i) { return s + i.qty }, 0)
-  var qtyLabel = totalQty + ' item' + (totalQty !== 1 ? 's' : '')
-  var hasItems = items.length > 0
-
-  if (!hasItems) {
-    summaryItemsEl.innerHTML    = '<div class="s-empty">No items selected yet.</div>'
-    summaryTotals.style.display = 'none'
-  } else {
-    summaryItemsEl.innerHTML = items.map(function(i) {
-      return '<div class="s-row">' +
-        '<span class="s-name">' + escHtml(i.name) + '</span>' +
-        '<div class="s-qty-ctrl">' +
-          '<button class="s-qty-btn" onclick="adjSidebarQty(\'' + i.id + '\',-1)">−</button>' +
-          '<span class="s-qty-num">' + i.qty + '</span>' +
-          '<button class="s-qty-btn" onclick="adjSidebarQty(\'' + i.id + '\',1)">+</button>' +
-        '</div>' +
-        '<span class="s-price">₱' + (i.price * i.qty).toFixed(2) + '</span>' +
-      '</div>'
-    }).join('')
-    totalAmtEl.textContent = '₱' + total.toFixed(2)
-    summaryTotals.style.display = 'block'
-  }
-  cartCountEl.textContent = qtyLabel
-  mbBadgeEl.textContent   = qtyLabel
-  mbTotalEl.textContent   = '₱' + total.toFixed(2)
-  sidebarActionEl.disabled  = !hasItems
-  mobileActionEl.disabled   = !hasItems
-  document.getElementById('step1-next').disabled = !hasItems
-  var payBtn = document.getElementById('sidebar-payment-btn')
-  if (payBtn) payBtn.style.display = (hasItems && maxStep >= 4 && currentStep !== 4) ? 'block' : 'none'
-  updateProgress()
-}
-
-document.querySelectorAll('input[name="orderType"]').forEach(function(input) {
-  input.addEventListener('change', function() {
-    deliveryBlock.style.display = input.value === 'delivery' ? 'block' : 'none'
-    var ps = document.getElementById('pay-section')
-    if (ps && !ps.classList.contains('pay-visible')) {
-      ps.classList.add('pay-visible')
-      setTimeout(function() {
-        ps.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }, 60)
-    }
-  })
-})
-
-dateInput.min = new Date().toISOString().split('T')[0]
-var _maxDate = new Date(); _maxDate.setDate(_maxDate.getDate() + 30)
-dateInput.max = _maxDate.toISOString().split('T')[0]
-
-for (var h = 8; h <= 17; h++) {
-  for (var m = 0; m < 60; m += 30) {
-    if (h === 17 && m > 0) break
-    var ampm = h < 12 ? 'AM' : 'PM', h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-    var label = h12 + ':' + (m === 0 ? '00' : m) + ' ' + ampm
-    var opt = document.createElement('option'); opt.value = label; opt.textContent = label
-    timeSelect.appendChild(opt)
-  }
-}
-
-function orderPrefix() {
-  var name = getBranding().name || 'My Bakery'
-  var skip = /^(the|a|an|of|and|or|in|at|by|for|&)$/i
-  var initials = name.split(/\s+/)
-    .filter(function(w){ return w.length > 0 && !skip.test(w) })
-    .map(function(w){ return w[0].toUpperCase() })
-    .join('')
-    .slice(0, 4)
-  return initials || 'ORD'
-}
-
-function nextOrderId() {
-  var arr = new Uint32Array(2)
-  crypto.getRandomValues(arr)
-  return orderPrefix() + '-' + (arr[0].toString(16) + arr[1].toString(16)).toUpperCase().slice(0, 8)
-}
-
-function submitOrder() {
-  var name    = document.getElementById('cust-name').value.trim()
-  var phone   = document.getElementById('cust-phone').value.trim()
-  var email   = document.getElementById('cust-email').value.trim()
-  var date    = dateInput.value
-  var time    = timeSelect.value
-  var type    = (document.querySelector('input[name="orderType"]:checked') || {}).value || ''
-  var address = document.getElementById('delivery-addr').value.trim()
-  var notes   = document.getElementById('cust-notes').value.trim()
-  var payment = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || ''
-  var payRef  = document.getElementById('pay-ref').value.trim()
-
-  if (!name || !phone || !date) { alert('Please complete all required fields.'); return }
-  if (type === 'delivery' && !address) { alert('Please enter a delivery address.'); return }
-  if (Object.keys(cart).length === 0)  { alert('Please select at least one item.'); return }
-
-  var items = Object.entries(cart).map(function(entry) {
-    var item = MENU.find(function(m) { return m.id === parseInt(entry[0], 10) })
-    if (!item) return null
-    return { id: item.id, name: item.name, price: item.price, qty: parseInt(entry[1], 10) }
-  }).filter(Boolean)
-  if (!items.length) { alert('Your cart is empty or contains unavailable items. Please update your order.'); return }
-  var total = items.reduce(function(s, i) { return s + i.price * i.qty }, 0)
-
-  var orderStatus = (payment === 'bank' || payment === 'qr') ? 'awaiting_confirmation' : 'pending'
-  var order = {
-    id: nextOrderId(), timestamp: Date.now(), status: orderStatus,
-    type: type, date: date, time: time, address: address,
-    customer: { name: name, phone: phone, email: email },
-    items: items, notes: notes, total: total,
-    paymentMethod: payment, paymentRef: payRef
-  }
-
-  if (!ACTIVE_URL || ACTIVE_URL === PLACEHOLDER) {
-    alert('Online ordering is not set up yet. Please contact us directly to place your order.')
-    return
-  }
-
-  // Client-side rate limit: max 3 orders per hour per browser
-  try {
-    var _rlNow  = Date.now()
-    var _rlData = JSON.parse(localStorage.getItem('scb_order_rate') || '[]').filter(function(t){ return _rlNow - t < 3600000 })
-    if (_rlData.length >= 3) {
-      alert('You have placed several orders recently. Please wait a while before placing another.')
-      return
-    }
-    _rlData.push(_rlNow)
-    localStorage.setItem('scb_order_rate', JSON.stringify(_rlData))
-  } catch(e) {}
-
-  placeOrderBtn.disabled      = true
-  sidebarActionEl.disabled    = true
-  mobileActionEl.disabled     = true
-  placeOrderBtn.textContent   = 'Sending…'
-  mbActionLabel.textContent   = '⏳ Sending…'
-
-  fetch(ACTIVE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'addOrder', order: order }) })
-    .then(function() { showReceipt(order) })
-    .catch(function() {
-      alert('Could not send your order. Please check your internet connection and try again.')
-      placeOrderBtn.disabled    = false
-      sidebarActionEl.disabled  = false
-      mobileActionEl.disabled   = false
-      placeOrderBtn.textContent = 'Confirm & Place Order'
-      mbActionLabel.textContent = 'Place Order'
-    })
-}
-
-function fmtDate(d) { var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0] }
-
-function showReceipt(order) {
-  var settings  = getPaymentSettings()
-  var branding  = getBranding()
-  var firstName = escHtml(order.customer.name.split(' ')[0])
-
-  // Hero
-  document.getElementById('ty-title').textContent    = 'Thank you, ' + firstName + '!'
-  document.getElementById('ty-order-id').textContent = order.id
-  document.getElementById('ty-sub').textContent = order.paymentMethod === 'cash'
-    ? 'Your order is confirmed!' : 'Awaiting payment verification.'
-
-  // ── Payment details for receipt ──
-  var payMethod = order.paymentMethod === 'cash' ? 'Cash'
-                : order.paymentMethod === 'bank' ? 'Bank Transfer' : 'E-Wallet / QR'
-  var payRows = '<div class="rcp-row rcp-meta"><span>Method</span><span>' + payMethod + '</span></div>'
-  if (order.paymentMethod === 'bank') {
-    if (settings.bank_name) payRows += '<div class="rcp-row rcp-meta"><span>Bank</span><span>' + escHtml(settings.bank_name) + '</span></div>'
-    if (settings.bank_acct) payRows += '<div class="rcp-row rcp-meta"><span>Acct No.</span><span>' + escHtml(settings.bank_acct) + '</span></div>'
-  }
-  if (order.paymentMethod === 'qr' && settings.qr_label) {
-    payRows += '<div class="rcp-row rcp-meta"><span>Wallet</span><span>' + escHtml(settings.qr_label) + '</span></div>'
-  }
-  if (order.paymentRef) {
-    payRows += '<div class="rcp-row rcp-meta"><span>Reference</span><span><strong>' + escHtml(order.paymentRef) + '</strong></span></div>'
-  }
-
-  // ── Footer note ──
-  var footerNote = order.paymentMethod === 'cash'
-    ? 'Pay ' + (order.type === 'pickup' ? 'on pickup' : 'upon delivery') + '. No advance payment needed.'
-    : 'Keep your reference number handy. We\'ll confirm once payment is verified.'
-
-  document.getElementById('receipt-body').innerHTML =
-    '<div class="rcp-paper">' +
-
-      // Store header
-      '<div class="rcp-store">' + escHtml((branding && branding.emoji) || '🥐') + ' ' + escHtml((branding && branding.name) || 'Sweet Crumb Bakery') + '</div>' +
-      '<div class="rcp-center" style="font-size:.7rem;letter-spacing:.1em;color:#aaa;margin-top:-.1rem">ORDER RECEIPT</div>' +
-      '<div class="rcp-center">' + fmtDate(order.date) + ' · ' + escHtml(order.time) + '</div>' +
-      '<div class="rcp-center">' + escHtml(order.id) + '</div>' +
-
-      '<hr class="rcp-dash">' +
-
-      // Items
-      '<div class="rcp-lbl">Items</div>' +
-      order.items.map(function(i) {
-        return '<div class="rcp-row">' +
-          '<span class="rcp-qty">' + i.qty + '×</span>' +
-          '<span class="rcp-name">' + escHtml(i.name) + '</span>' +
-          '<span class="rcp-price">₱' + (i.price * i.qty).toFixed(2) + '</span>' +
-        '</div>'
-      }).join('') +
-
-      '<hr class="rcp-dash">' +
-      '<div class="rcp-row rcp-total"><span>TOTAL</span><span>₱' + order.total.toFixed(2) + '</span></div>' +
-
-      '<hr class="rcp-dash">' +
-
-      // Payment
-      '<div class="rcp-lbl">Payment</div>' +
-      payRows +
-
-      '<hr class="rcp-dash">' +
-
-      // Order details
-      '<div class="rcp-lbl">Order Details</div>' +
-      '<div class="rcp-row rcp-meta"><span>Type</span><span>' + (order.type === 'pickup' ? 'Pickup' : 'Delivery') + '</span></div>' +
-      '<div class="rcp-row rcp-meta"><span>Date</span><span>' + fmtDate(order.date) + '</span></div>' +
-      '<div class="rcp-row rcp-meta"><span>Time</span><span>' + escHtml(order.time) + '</span></div>' +
-      (order.address ? '<div class="rcp-row rcp-meta"><span>Address</span><span style="max-width:55%;text-align:right">' + escHtml(order.address) + '</span></div>' : '') +
-
-      '<hr class="rcp-dash">' +
-
-      // Customer
-      '<div class="rcp-lbl">Customer</div>' +
-      '<div class="rcp-row rcp-meta"><span>Name</span><span>' + escHtml(order.customer.name) + '</span></div>' +
-      '<div class="rcp-row rcp-meta"><span>Phone</span><span>' + escHtml(order.customer.phone) + '</span></div>' +
-      (order.customer.email ? '<div class="rcp-row rcp-meta"><span>Email</span><span>' + escHtml(order.customer.email) + '</span></div>' : '') +
-      (order.notes ? '<div class="rcp-row"><span class="rcp-note">Note: ' + escHtml(order.notes) + '</span></div>' : '') +
-
-      '<hr class="rcp-dash">' +
-
-      // Footer
-      '<div class="rcp-footer">' +
-        '<div class="rcp-note">' + footerNote + '</div>' +
-        '<strong>Thank you for your order! 🙏</strong>' +
-      '</div>' +
-
-    '</div>'
-
-  receiptModal.style.display = 'flex'
-  initRating(order)
-}
-
-// ── Post-order star rating ─────────────────────────────────
-var _ratingSelected  = 0
-var _ratingOrderId   = ''
-var _ratingOrderItems = []
-
-function initRating(order) {
-  _ratingSelected   = 0
-  _ratingOrderId    = order.id
-  _ratingOrderItems = order.items || []
-  document.getElementById('rating-section').style.display = 'block'
-  document.getElementById('rating-thanks').style.display  = 'none'
-  document.getElementById('rating-comment').value = ''
-  _updateStars(0)
-}
-
-function _updateStars(count) {
-  document.querySelectorAll('.star-btn').forEach(function(btn) {
-    btn.classList.toggle('active', parseInt(btn.dataset.r) <= count)
-  })
-}
-
-document.querySelectorAll('.star-btn').forEach(function(btn) {
-  var r = parseInt(btn.dataset.r)
-  btn.addEventListener('click',      function() { _ratingSelected = r; _updateStars(r) })
-  btn.addEventListener('mouseenter', function() { _updateStars(r) })
-  btn.addEventListener('mouseleave', function() { _updateStars(_ratingSelected) })
-})
-
-document.getElementById('rating-submit-btn').addEventListener('click', function() {
-  if (!_ratingSelected) {
-    document.getElementById('star-row').style.animation = 'none'
-    document.querySelectorAll('.star-btn').forEach(function(b) { b.style.color = '#ef4444' })
-    setTimeout(function() {
-      document.querySelectorAll('.star-btn').forEach(function(b) { b.style.color = '' })
-      _updateStars(0)
-    }, 600)
-    return
-  }
-  var comment  = document.getElementById('rating-comment').value.trim()
-  var itemName = _ratingOrderItems.length ? _ratingOrderItems[0].name : ''
-  if (typeof ACTIVE_URL !== 'undefined' && ACTIVE_URL && ACTIVE_URL !== PLACEHOLDER) {
-    fetch(ACTIVE_URL, {
-      method: 'POST', mode: 'no-cors',
-      body: JSON.stringify({ action: 'addReview', review: {
-        orderId:   _ratingOrderId,
-        itemName:  itemName,
-        rating:    _ratingSelected,
-        comment:   comment,
-        timestamp: Date.now()
-      }})
-    }).catch(function() {})
-  }
-  document.getElementById('rating-section').style.display = 'none'
-  document.getElementById('rating-thanks').style.display  = 'block'
-})
-
-function skipRating() {
-  document.getElementById('rating-section').style.display = 'none'
-}
-
-document.getElementById('print-btn').addEventListener('click', function() {
-  var paper = document.querySelector('.rcp-paper')
-  if (!paper) return
-
-  var pw = window.open('', '_blank', 'width=480,height=700,scrollbars=yes')
-  if (!pw) { window.print(); return }   // fallback if popup blocked
-
-  pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt</title><style>' +
-    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
-    'body { font-family: "Courier New", Courier, monospace; font-size: 10pt; color: #000; background: #fff; max-width: 320px; margin: 0 auto; padding: 1.2cm 1cm; }' +
-    '@page { size: auto; margin: 1.5cm; }' +
-    '.rcp-store  { text-align: center; font-size: 12pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }' +
-    '.rcp-center { text-align: center; color: #555; font-size: 8.5pt; margin-top: .15rem; }' +
-    'hr.rcp-dash { border: none; border-top: 1.5px dashed #666; margin: .65rem 0; }' +
-    '.rcp-lbl    { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .1em; color: #777; margin: .45rem 0 .1rem; }' +
-    '.rcp-row    { display: flex; justify-content: space-between; align-items: baseline; gap: .35rem; line-height: 1.7; }' +
-    '.rcp-name   { flex: 1; }' +
-    '.rcp-price  { flex-shrink: 0; text-align: right; }' +
-    '.rcp-qty    { color: #555; min-width: 2rem; }' +
-    '.rcp-total  { font-weight: 800; font-size: 10.5pt; }' +
-    '.rcp-meta   { color: #333; }' +
-    '.rcp-note   { color: #666; font-style: italic; font-size: 8.5pt; }' +
-    '.rcp-footer { text-align: center; font-size: 8.5pt; color: #555; padding-top: .25rem; line-height: 1.65; }' +
-    '.rcp-footer strong { display: block; color: #000; font-size: 9.5pt; margin-top: .15rem; }' +
-  '</style></head><body>' + paper.innerHTML + '</body></html>')
-
-  pw.document.close()
-  pw.focus()
-  setTimeout(function() { pw.print() }, 250)
-})
-
-document.getElementById('order-again-btn').addEventListener('click', function() {
-  receiptModal.style.display = 'none'
-  cancelOrder(true)
-})
-
-document.getElementById('done-btn').addEventListener('click', function() {
-  receiptModal.style.display = 'none'
-  clearDraft()
-  window.location.href = 'landing.html'
-})
 
 function escHtml(s) {
   return String(s == null ? '' : s)
@@ -1866,63 +376,6 @@ function escHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;')
 }
 
-// ── Item detail bottom sheet ───────────────────────────────
-var _sheetItemId = null
-
-function openItemSheet(id) {
-  var item = MENU.find(function(m) { return m.id === id })
-  if (!item) return
-  _sheetItemId = id
-
-  var imgWrap = document.getElementById('sheet-img-wrap')
-  var imgSrc  = safeUrl(item.img)
-  if (imgSrc) {
-    imgWrap.innerHTML = '<img class="item-sheet-img" src="' + escHtml(imgSrc) + '" alt="' + escHtml(item.name) + '" onerror="this.parentElement.innerHTML=\'<div class=item-sheet-img-ph>' + (item.cat ? escHtml(item.cat[0]) : '🥐') + '</div>\'">'
-  } else {
-    imgWrap.innerHTML = '<div class="item-sheet-img-ph"><span class="brand-emoji">🥐</span></div>'
-  }
-
-  document.getElementById('sheet-cat').textContent   = item.cat  || ''
-  document.getElementById('sheet-name').textContent  = item.name || ''
-  document.getElementById('sheet-price').textContent = '₱' + item.price.toFixed(2)
-  var descEl = document.getElementById('sheet-desc')
-  descEl.textContent    = item.desc || ''
-  descEl.style.display  = item.desc ? '' : 'none'
-
-  _updateSheetBtn()
-  var overlay = document.getElementById('item-sheet-overlay')
-  overlay.classList.add('open')
-  document.body.style.overflow = 'hidden'
-}
-
-function _updateSheetBtn() {
-  var qty = (_sheetItemId && cart[_sheetItemId]) || 0
-  var btn = document.getElementById('sheet-add-btn')
-  btn.textContent = qty ? 'Add one more  (' + qty + ' in cart)' : 'Add to Cart'
-}
-
-function sheetAddToCart() {
-  if (!_sheetItemId) return
-  cart[_sheetItemId] = (cart[_sheetItemId] || 0) + 1
-  saveCart()
-  updateCartUI()
-  updateCardUI(_sheetItemId)
-  _updateSheetBtn()
-  showToast(escHtml((MENU.find(function(m){ return m.id === _sheetItemId }) || {}).name || '') + ' added!')
-}
-
-function closeItemSheet() {
-  document.getElementById('item-sheet-overlay').classList.remove('open')
-  document.body.style.overflow = ''
-  _sheetItemId = null
-}
-
-// Close on back-swipe / escape key
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeItemSheet()
-})
-
-// Allow http/https URLs and data:image/ URIs (base64 QR uploads). Block javascript:, data:text, etc.
 function safeUrl(url) {
   if (!url) return ''
   var u = String(url).trim()
@@ -1931,163 +384,188 @@ function safeUrl(url) {
   return ''
 }
 
-// ── Draft persistence (survives refresh) ──────────────────
-var DRAFT_KEY = 'scb_order_draft'
-
-function saveDraft() {
-  var draft = {
-    cart:          cart,
-    step:          currentStep,
-    maxStep:       maxStep,
-    orderType:     (document.querySelector('input[name="orderType"]:checked') || {}).value || '',
-    date:          dateInput.value,
-    time:          timeSelect.value,
-    address:       document.getElementById('delivery-addr').value,
-    paymentMethod: (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || 'cash',
-    payRef:        document.getElementById('pay-ref').value,
-    name:          document.getElementById('cust-name').value,
-    phone:         document.getElementById('cust-phone').value,
-    email:         document.getElementById('cust-email').value,
-    notes:         document.getElementById('cust-notes').value
+// ── Featured items ─────────────────────────────────────────
+function renderFeatured() {
+  var s = getLandingSettings()
+  var items = MENU.slice(0, 4)
+  if (s.featured_ids && s.featured_ids.length) {
+    var picked = s.featured_ids.map(function(id) {
+      return MENU.find(function(m) { return m.id === id })
+    }).filter(Boolean)
+    if (picked.length) items = picked.slice(0, 4)
   }
-  sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+
+  var grid = document.getElementById('feat-grid')
+  var empty = document.getElementById('featured-empty')
+  var more  = document.getElementById('feat-see-more')
+
+  if (!items.length) {
+    empty.style.display = 'block'
+    return
+  }
+
+  grid.innerHTML = items.map(function(item) {
+    var src = safeUrl(item.img)
+    var imgHtml = src
+      ? '<img src="' + escHtml(src) + '" alt="' + escHtml(item.name) + '" onerror="this.parentElement.innerHTML=\'<span style=font-size:2.5rem>🥐</span>\'">'
+      : '<span style="font-size:2.5rem">🥐</span>'
+    return '<div class="feat-card">' +
+      '<div class="feat-card-img">' + imgHtml + '</div>' +
+      '<div class="feat-card-body">' +
+        '<div class="feat-card-cat">' + escHtml(item.cat) + '</div>' +
+        '<div class="feat-card-name">' + escHtml(item.name) + '</div>' +
+        (item.desc ? '<div class="feat-card-desc">' + escHtml(item.desc) + '</div>' : '') +
+        '<div class="feat-card-price">₱' + parseFloat(item.price).toFixed(2) + '</div>' +
+      '</div>' +
+    '</div>'
+  }).join('')
+
+  if (MENU.length > 4) more.style.display = 'inline-flex'
 }
 
-function restoreDraft() {
-  var raw = sessionStorage.getItem(DRAFT_KEY)
-  if (!raw) return
+// ── Announcements ──────────────────────────────────────────
+function renderAnnouncements() {
+  var s = getLandingSettings()
+
+  var promo = document.getElementById('promo-section')
+  if (s.promo_active && s.promo_title) {
+    document.getElementById('promo-title').textContent = s.promo_title
+    document.getElementById('promo-body').textContent  = s.promo_body || ''
+    var promoImg = document.getElementById('promo-img')
+    var promoImgUrl = safeUrl(s.promo_img)
+    if (promoImgUrl) { promoImg.src = promoImgUrl; promoImg.style.display = 'block' }
+    promo.style.display = 'block'
+  }
+
+  var news = document.getElementById('news-section')
+  if (s.news_active && s.news_title) {
+    document.getElementById('news-title').textContent = s.news_title
+    document.getElementById('news-body').textContent  = s.news_body || ''
+    var newsImg = document.getElementById('news-img')
+    var newsImgUrl = safeUrl(s.news_img)
+    if (newsImgUrl) { newsImg.src = newsImgUrl; newsImg.style.display = 'block' }
+    news.style.display = 'block'
+  }
+
+  var about = document.getElementById('about-section')
+  if (s.about_active && s.about_text) {
+    document.getElementById('about-text').textContent = s.about_text
+    about.style.display = 'block'
+  }
+}
+
+// ── Load menu ──────────────────────────────────────────────
+function loadMenu() {
   try {
-    var d = JSON.parse(raw)
-    if (d.cart && typeof d.cart === 'object') {
-      cart = d.cart
-      Object.keys(cart).forEach(function(k) { cart[k] = parseInt(cart[k], 10) })
-    }
-    if (d.orderType) {
-      var otEl = document.getElementById('type-' + d.orderType)
-      if (otEl) {
-        otEl.checked = true
-        deliveryBlock.style.display = d.orderType === 'delivery' ? 'block' : 'none'
-        var ps = document.getElementById('pay-section')
-        if (ps) ps.classList.add('pay-visible')
-      }
-    }
-    if (d.date)    dateInput.value = d.date
-    if (d.time)    timeSelect.value = d.time
-    if (d.address) document.getElementById('delivery-addr').value = d.address
-    if (d.paymentMethod) {
-      var pmEl = document.getElementById('pay-' + d.paymentMethod)
-      if (pmEl) pmEl.checked = true
-    }
-    if (d.payRef)  document.getElementById('pay-ref').value  = d.payRef
-    if (d.name)    document.getElementById('cust-name').value  = d.name
-    if (d.phone)   document.getElementById('cust-phone').value = d.phone
-    if (d.email)   document.getElementById('cust-email').value = d.email
-    if (d.notes)   document.getElementById('cust-notes').value = d.notes
-    currentStep = (parseInt(d.step) || 1)
-    if (currentStep > 1 && Object.keys(cart).length === 0) currentStep = 1
-    maxStep = Math.max(currentStep, parseInt(d.maxStep) || 1)
-    if (d.paymentMethod) updatePaymentDisplay()
-  } catch(e) { currentStep = 1 }
-}
-
-function clearDraft() { sessionStorage.removeItem(DRAFT_KEY) }
-
-// Patch updateSummary and showStep to auto-save
-var _origUpdateSummary = updateSummary
-updateSummary = function() { _origUpdateSummary(); saveDraft() }
-
-function scrollToForm() {
-  var anchor = document.querySelector('.step-progress') || document.querySelector('.steps-container')
-  if (!anchor) return
-  var nav  = document.querySelector('.site-nav')
-  var navH = nav ? nav.offsetHeight : 0
-  var top  = anchor.getBoundingClientRect().top + window.pageYOffset - navH - 10
-  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
-}
-
-var _origShowStep = showStep
-var _stepInitDone = false
-showStep = function(n) {
-  _origShowStep(n)
-  saveDraft()
-  if (_stepInitDone) scrollToForm()
-}
-
-// Patch cancelOrder to clear draft
-var _origCancelOrder = cancelOrder
-cancelOrder = function(skipConfirm) { _origCancelOrder(skipConfirm); clearDraft() }
-
-// Also save when fields change
-;['order-date','order-time','delivery-addr','pay-ref','cust-name','cust-phone','cust-email','cust-notes'].forEach(function(id) {
-  var el = document.getElementById(id)
-  if (el) el.addEventListener('input', saveDraft)
-})
-document.querySelectorAll('input[name="orderType"], input[name="paymentMethod"]').forEach(function(r) {
-  r.addEventListener('change', saveDraft)
-})
-
-applyBranding()
-updateDocTitle('Place an Order')
-
-// Apply branding to hero elements
-;(function() {
-  var b   = getBranding()
-  var tl  = document.getElementById('hero-tagline')
-  var hero = document.getElementById('order-hero')
-  if (tl) tl.textContent = b.tagline || ''
-  if (hero) {
-    var url = b.banner_img && (/^https?:\/\//i.test(b.banner_img) || /^data:image\//i.test(b.banner_img)) ? b.banner_img : ''
-    if (url) {
-      hero.style.backgroundImage = 'url("' + url.replace(/"/g, '%22') + '")'
-      hero.classList.add('has-banner-img')
-    }
+    var local = JSON.parse(localStorage.getItem('scb_menu'))
+    if (local && local.length) { MENU = local; renderFeatured(); return }
+  } catch(e) {}
+  if (typeof BUNDLED_MENU !== 'undefined' && BUNDLED_MENU.length) {
+    MENU = BUNDLED_MENU; renderFeatured(); return
   }
-})()
-
-// sessionStorage is tab-scoped: empty on a fresh tab, preserved on refresh.
-// Always restore — nothing to restore on genuinely new tabs.
-restoreDraft()
-
-if (!ACTIVE_URL || ACTIVE_URL === PLACEHOLDER) {
-  var _wb = document.getElementById('url-warning-bar')
-  if (_wb) _wb.style.display = 'block'
+  if (!ACTIVE_URL || ACTIVE_URL === PLACEHOLDER) { renderFeatured(); return }
+  fetch(ACTIVE_URL + '?action=menu')
+    .then(function(r) { return r.json() })
+    .then(function(d) { MENU = d.items || []; renderFeatured() })
+    .catch(function() { renderFeatured() })
 }
 
-// Smooth nav fill: glassmorphism overlay fades in proportionally as the hero scrolls away
-;(function() {
-  var nav  = document.getElementById('order-nav')
-  var hero = document.getElementById('order-hero')
-  if (!nav || !hero) return
-  var isLight = false
-  function update() {
-    var heroH = hero.offsetHeight || 1
-    var ratio = Math.min(1, Math.max(0, window.pageYOffset / heroH))
-    nav.style.setProperty('--nav-fill', ratio)
-    var shouldLight = ratio >= 0.65
-    if (shouldLight !== isLight) {
-      isLight = shouldLight
-      nav.classList.toggle('nav-light', isLight)
+// ── Footer ─────────────────────────────────────────────────
+function renderFooter() {
+  document.getElementById('footer-year').textContent = new Date().getFullYear()
+  try {
+    var pay = JSON.parse(localStorage.getItem('scb_payment')) || {}
+    var parts = []
+    if (pay.messenger)     parts.push(pay.contact_label || 'Message us on Messenger')
+    var fc = document.getElementById('footer-contact')
+    if (parts.length) fc.textContent = parts.join(' · ')
+  } catch(e) {}
+}
+
+// ── Hero banner image + page background ────────────────────
+function applyHeroBanner() {
+  try {
+    var b = getBranding()
+    document.documentElement.style.setProperty('--bg', b.bg_color || '#faf8f5')
+    var hero = document.getElementById('land-hero')
+    if (hero && b.banner_img && (/^https?:\/\//i.test(b.banner_img) || /^data:image\//i.test(b.banner_img))) {
+      hero.style.backgroundImage = 'url("' + b.banner_img.replace(/"/g, '%22') + '")'
+      hero.classList.add('has-banner')
     }
+  } catch(e) {}
+}
+
+// ── Nav ────────────────────────────────────────────────────
+var NAV_SECTIONS = [
+  { id: 'featured',      label: 'Menu',        always: true },
+  { id: 'promo-section', label: 'Promos',       always: false },
+  { id: 'news-section',  label: "What's New",   always: false },
+  { id: 'about-section', label: 'About',        always: false },
+]
+
+function buildNav() {
+  var container = document.getElementById('land-nav-links')
+  var html = ''
+  NAV_SECTIONS.forEach(function(s) {
+    var el = document.getElementById(s.id)
+    if (s.always || (el && el.style.display !== 'none')) {
+      html += '<a href="#' + s.id + '" class="land-nav-link" onclick="closeNavMenu()">' + escHtml(s.label) + '</a>'
+    }
+  })
+  // Mobile-only Order Now at bottom of drawer
+  html += '<a href="order.html" class="land-nav-order-mobile">Order Now →</a>'
+  container.innerHTML = html
+  initScrollSpy()
+}
+
+function toggleNavMenu() {
+  document.getElementById('land-nav').classList.toggle('nav-open')
+}
+
+function closeNavMenu() {
+  document.getElementById('land-nav').classList.remove('nav-open')
+}
+
+document.addEventListener('click', function(e) {
+  var nav = document.getElementById('land-nav')
+  if (nav.classList.contains('nav-open') && !nav.contains(e.target)) closeNavMenu()
+})
+
+function initScrollSpy() {
+  function update() {
+    var scrollY = window.pageYOffset + 90  // offset for fixed nav height
+    var current = null
+    NAV_SECTIONS.forEach(function(s) {
+      var el = document.getElementById(s.id)
+      if (!el || el.style.display === 'none') return
+      if (el.getBoundingClientRect().top + window.pageYOffset <= scrollY) current = s.id
+    })
+    document.querySelectorAll('.land-nav-link').forEach(function(link) {
+      var id = (link.getAttribute('href') || '').slice(1)
+      link.classList.toggle('active', id === current)
+    })
   }
   window.addEventListener('scroll', update, { passive: true })
   update()
-})()
+}
 
-loadMenu()             // renders grid with correct has-qty states
-showStep(currentStep)  // shows the right step (review renders after menu loaded)
-_stepInitDone = true   // scroll only fires on subsequent step switches, not initial load
-updateSummary()
-applyContactButton()   // show floating Messenger button if configured
+// ── Init ───────────────────────────────────────────────────
+// Seamless page transition to order page
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a[href="order.html"]')
+  if (!link) return
+  e.preventDefault()
+  document.body.classList.add('page-exit')
+  setTimeout(function() { window.location.href = 'order.html' }, 230)
+})
 
-// Start with the form in view — scroll past the hero instantly before first paint
-;(function() {
-  var hero = document.getElementById('order-hero')
-  var nav  = document.getElementById('order-nav')
-  if (!hero) return
-  window.scrollTo(0, hero.offsetHeight)
-  // Prime nav to its scrolled state so it doesn't flash dark before the scroll event fires
-  if (nav) { nav.style.setProperty('--nav-fill', 1); nav.classList.add('nav-light') }
-})()
+applyBranding()
+updateDocTitle()
+applyHeroBanner()
+renderAnnouncements()
+buildNav()
+loadMenu()
+renderFooter()
 </script>
 </body>
 </html>
