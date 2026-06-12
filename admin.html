@@ -211,7 +211,7 @@
   <!-- ── Sidebar (left) ────────────────────────────────── -->
   <aside class="admin-sidebar">
 
-    <!-- PIN warning -->
+    <!-- Default PIN warning -->
     <div class="sidebar-widget sidebar-warn" id="default-pin-banner" style="display:none">
       <div class="sidebar-widget-head">🔑 Security Alert</div>
       <p style="font-size:.81rem;color:var(--text);line-height:1.55;margin-bottom:.75rem">
@@ -219,6 +219,15 @@
         Change it before sharing the admin link.
       </p>
       <button class="btn-primary btn-sm" style="width:100%;background:var(--danger)" onclick="switchTab('settings');switchSettingsPanel('security');document.getElementById('pin-current').focus()">Change PIN →</button>
+    </div>
+
+    <!-- PIN not published warning -->
+    <div class="sidebar-widget sidebar-warn" id="pin-unpublished-banner" style="display:none">
+      <div class="sidebar-widget-head">⚠️ PIN Not Published</div>
+      <p style="font-size:.81rem;color:var(--text);line-height:1.55;margin-bottom:.75rem">
+        Your new PIN is only active on <strong>this browser</strong>. Other sessions can still use the old PIN until you publish to Netlify.
+      </p>
+      <button class="btn-primary btn-sm" style="width:100%" onclick="publishMenu()">Publish Now →</button>
     </div>
 
     <!-- Setup checklist -->
@@ -1129,7 +1138,16 @@ var MENU_STORE = 'scb_menu'
 
 function fetchMenuItems(callback) {
   try {
-    menuItems = JSON.parse(localStorage.getItem(MENU_STORE)) || []
+    var stored = localStorage.getItem(MENU_STORE)
+    if (stored !== null) {
+      menuItems = JSON.parse(stored) || []
+    } else if (typeof BUNDLED_MENU !== 'undefined' && Array.isArray(BUNDLED_MENU) && BUNDLED_MENU.length) {
+      // First load on this browser — seed from published bundle so existing items are visible
+      menuItems = BUNDLED_MENU.map(function(i) { return Object.assign({}, i) })
+      persistMenu()
+    } else {
+      menuItems = []
+    }
   } catch(e) {
     menuItems = []
   }
@@ -1624,8 +1642,13 @@ async function hashPin(pin) {
 }
 
 function getStoredPinHash() {
-  return localStorage.getItem('scb_admin_pin_hash') ||
-    (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH)
+  var local = localStorage.getItem('scb_admin_pin_hash')
+  if (local) return local
+  // Only trust BUNDLED_PIN if it is not the factory default — means owner published a real PIN
+  if (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN && BUNDLED_PIN !== DEFAULT_PIN_HASH) {
+    return BUNDLED_PIN
+  }
+  return DEFAULT_PIN_HASH
 }
 
 function checkAuth() {
@@ -1746,15 +1769,21 @@ function renderSetupChecklist() {
   try { payment  = JSON.parse(localStorage.getItem('scb_payment'))  || {} } catch(e) {}
   try { branding = JSON.parse(localStorage.getItem('scb_branding')) || {} } catch(e) {}
 
-  var pinChanged   = !!localStorage.getItem('scb_admin_pin_hash')
+  var localPinHash = localStorage.getItem('scb_admin_pin_hash')
+  var pinChanged   = !!localPinHash
   var urlOk        = isConfigured()
   var menuOk       = menu.length > 0
   var paymentOk    = !!(payment.bank_acct || payment.qr_image || payment.messenger)
   var brandingOk   = !!(branding.name)
   var allDone      = urlOk && pinChanged && menuOk && paymentOk && brandingOk
 
-  // Show default PIN warning if PIN never changed
+  // Show default PIN warning if PIN never changed on this browser
   document.getElementById('default-pin-banner').style.display = pinChanged ? 'none' : 'flex'
+
+  // Show "PIN not published" warning when local PIN differs from the deployed bundle
+  var bundledPinCurrent = typeof BUNDLED_PIN !== 'undefined' ? BUNDLED_PIN : DEFAULT_PIN_HASH
+  var pinUnpublished = pinChanged && localPinHash !== bundledPinCurrent
+  document.getElementById('pin-unpublished-banner').style.display = pinUnpublished ? 'flex' : 'none'
 
   // Hide checklist once everything is done
   if (allDone) { document.getElementById('setup-checklist').style.display = 'none'; return }
