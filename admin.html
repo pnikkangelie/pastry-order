@@ -784,22 +784,48 @@ function toggleCard(id) {
 }
 
 // ── New-order banner ───────────────────────────────────────
-var _bannerCount = 0
-function showNewOrderBanner(count) {
-  _bannerCount += count
+var _bannerCount        = 0
+var _attentionShown     = false   // show attention banner once per page load
+
+function _showBanner(html, viewFilter) {
   var banner = document.getElementById('new-order-banner')
   var msg    = document.getElementById('banner-msg')
-  msg.innerHTML = '<strong>' + _bannerCount + ' new order' + (_bannerCount > 1 ? 's' : '') + ' received!</strong>' +
-    '<span>Tap View Orders to review</span>'
+  msg.innerHTML = html
+  banner.dataset.filter = viewFilter || 'all'
   banner.classList.remove('banner-visible')
-  void banner.offsetWidth  // force reflow so animation replays
+  void banner.offsetWidth
   banner.classList.add('banner-visible')
 }
 
+function showNewOrderBanner(count) {
+  _bannerCount += count
+  _showBanner(
+    '<strong>' + _bannerCount + ' new order' + (_bannerCount > 1 ? 's' : '') + ' received!</strong>' +
+    '<span>Tap View Orders to see</span>',
+    'all'
+  )
+}
+
+function showAttentionBanner(pending, unconf) {
+  if (_attentionShown) return
+  _attentionShown = true
+  var total = pending + unconf
+  if (!total) return
+  var parts = []
+  if (pending) parts.push(pending + ' pending')
+  if (unconf)  parts.push(unconf  + ' awaiting payment')
+  _showBanner(
+    '<strong>' + total + ' order' + (total > 1 ? 's' : '') + ' need' + (total === 1 ? 's' : '') + ' attention</strong>' +
+    '<span>' + parts.join(' · ') + '</span>',
+    unconf ? 'awaiting_confirmation' : 'all'
+  )
+}
+
 function dismissNewOrderBanner(goToOrders) {
+  var filter = document.getElementById('new-order-banner').dataset.filter || 'all'
   document.getElementById('new-order-banner').classList.remove('banner-visible')
   _bannerCount = 0
-  if (goToOrders) { switchTab('orders'); setFilter('all') }
+  if (goToOrders) { switchTab('orders'); setFilter(filter) }
 }
 
 // ── Stats (uses cached allOrders) ──────────────────────────
@@ -1053,6 +1079,10 @@ function render() {
     }
     renderOrders()
     startPolling()
+    // Show banner on first load for any orders already needing attention
+    var pendingCount = allOrders.filter(function(o){ return o.status === 'pending' }).length
+    var unconfCount  = allOrders.filter(function(o){ return o.status === 'awaiting_confirmation' }).length
+    showAttentionBanner(pendingCount, unconfCount)
   })
 }
 
