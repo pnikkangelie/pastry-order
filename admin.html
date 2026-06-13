@@ -248,7 +248,7 @@
       <p style="font-size:.81rem;color:var(--text);line-height:1.55;margin-bottom:.75rem">
         Your new PIN is only active on <strong>this browser</strong>. Other sessions can still use the old PIN until you publish to Netlify.
       </p>
-      <button class="btn-primary btn-sm" style="width:100%" onclick="publishMenu()">Publish Now →</button>
+      <button class="btn-primary btn-sm" style="width:100%" onclick="publishMenu()">🚀 Publish &amp; Deploy →</button>
     </div>
 
     <!-- Setup checklist -->
@@ -301,7 +301,7 @@
     <div class="menu-toolbar">
       <span style="font-size:.85rem;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="menu-count"></span>
       <div style="display:flex;gap:.5rem;flex-shrink:0">
-        <button class="btn-outline btn-sm" onclick="publishMenu()" title="Downloads menu.js bundling your menu, payment settings, and branding. Replace the file in your project and redeploy to Netlify.">⬇ Publish to Netlify</button>
+        <button class="btn-outline btn-sm" id="publish-btn" onclick="publishMenu()">🚀 Publish &amp; Deploy</button>
         <button class="btn-primary btn-sm" onclick="openItemModal()">+ Add Item</button>
       </div>
     </div>
@@ -348,6 +348,13 @@
           <div>
             <div class="settings-nav-label">Security</div>
             <div class="settings-nav-sub">Admin PIN</div>
+          </div>
+        </button>
+        <button class="settings-nav-item" data-spanel="deploy" onclick="switchSettingsPanel('deploy')">
+          <span class="settings-nav-icon">🚀</span>
+          <div>
+            <div class="settings-nav-label">Deploy</div>
+            <div class="settings-nav-sub">GitHub auto-publish</div>
           </div>
         </button>
       </aside>
@@ -571,6 +578,30 @@
           <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
             <button class="btn-primary" style="width:auto" onclick="changePin()">Change PIN</button>
             <span id="pin-saved" style="font-size:.82rem;color:var(--success);display:none">✓ PIN changed!</span>
+          </div>
+        </div>
+
+        <!-- Deploy panel -->
+        <div class="settings-panel" id="spanel-deploy">
+          <h3>Auto-Deploy</h3>
+          <p class="panel-sub">Enter your GitHub token once and the <strong>Publish &amp; Deploy</strong> button will push changes directly to GitHub — Cloudflare Pages then deploys automatically.</p>
+          <div class="field" style="margin-bottom:.75rem">
+            <label>GitHub Personal Access Token</label>
+            <div style="display:flex;gap:.5rem">
+              <input type="password" id="deploy-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" maxlength="100" style="flex:1">
+              <button class="btn-outline btn-sm" style="flex-shrink:0" onclick="toggleTokenVisibility()">👁</button>
+            </div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:.35rem">
+              Get one at <strong>github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong>. Enable the <code>repo</code> scope.
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:1rem">
+            <label>GitHub Repository</label>
+            <input type="text" id="deploy-repo" placeholder="owner/repository-name" maxlength="100">
+          </div>
+          <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto" onclick="saveDeploySettings()">Save</button>
+            <span id="deploy-saved" style="font-size:.82rem;color:var(--success);display:none">✓ Saved!</span>
           </div>
         </div>
 
@@ -1354,7 +1385,7 @@ function confirmDeleteItem(id) {
   showToast('Item deleted.', 'info')
 }
 
-function publishMenu() {
+async function publishMenu() {
   var payment  = {}
   var branding = {}
   var landing  = {}
@@ -1366,30 +1397,98 @@ function publishMenu() {
     (typeof ADMIN_BUNDLED_PIN !== 'undefined' && ADMIN_BUNDLED_PIN ? ADMIN_BUNDLED_PIN :
      (typeof BUNDLED_PIN !== 'undefined' && BUNDLED_PIN ? BUNDLED_PIN : DEFAULT_PIN_HASH))
 
-  // Download menu.js (menu, settings, branding)
   var menuContent =
-    'var BUNDLED_MENU = ' + JSON.stringify(menuItems, null, 2) + ';\n' +
-    'var BUNDLED_PAYMENT = ' + JSON.stringify(payment, null, 2) + ';\n' +
-    'var BUNDLED_BRANDING = ' + JSON.stringify(branding, null, 2) + ';\n' +
-    'var BUNDLED_LANDING = ' + JSON.stringify(landing, null, 2) + ';\n' +
-    'var BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
-  var blob1 = new Blob([menuContent], { type: 'text/javascript' })
-  var url1  = URL.createObjectURL(blob1)
-  var a1    = document.createElement('a')
-  a1.href = url1; a1.download = 'menu.js'; a1.click()
-  URL.revokeObjectURL(url1)
+    'var BUNDLED_MENU = '     + JSON.stringify(menuItems, null, 2) + ';\n' +
+    'var BUNDLED_PAYMENT = '  + JSON.stringify(payment,   null, 2) + ';\n' +
+    'var BUNDLED_BRANDING = ' + JSON.stringify(branding,  null, 2) + ';\n' +
+    'var BUNDLED_LANDING = '  + JSON.stringify(landing,   null, 2) + ';\n' +
+    'var BUNDLED_PIN = '      + JSON.stringify(currentPinHash) + ';\n'
+  var pinContent = 'var ADMIN_BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
 
-  // Download pin-config.js (authoritative PIN — this tiny file is always fresh on every browser)
-  setTimeout(function() {
-    var pinContent = 'var ADMIN_BUNDLED_PIN = ' + JSON.stringify(currentPinHash) + ';\n'
-    var blob2 = new Blob([pinContent], { type: 'text/javascript' })
-    var url2  = URL.createObjectURL(blob2)
-    var a2    = document.createElement('a')
-    a2.href = url2; a2.download = 'pin-config.js'; a2.click()
-    URL.revokeObjectURL(url2)
-  }, 300)
+  var token = localStorage.getItem('scb_github_token') || ''
+  var repo  = localStorage.getItem('scb_github_repo')  || ''
 
-  showToast('✓ menu.js + pin-config.js downloaded — replace both files and redeploy to Netlify.', 'ok')
+  if (token && repo) {
+    // ── GitHub API push ──────────────────────────────────────
+    var btn = document.getElementById('publish-btn')
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Deploying…' }
+    try {
+      await _ghPushFile(token, repo, 'menu.js',      menuContent)
+      await _ghPushFile(token, repo, 'pin-config.js', pinContent)
+      showToast('✓ Deployed! Cloudflare will update in ~1 min.', 'ok')
+      renderSetupChecklist()
+    } catch(err) {
+      showToast('Deploy failed: ' + err.message, 'error')
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '🚀 Publish &amp; Deploy' }
+    }
+  } else {
+    // ── Fallback: download files ─────────────────────────────
+    var blob1 = new Blob([menuContent], { type: 'text/javascript' })
+    var url1  = URL.createObjectURL(blob1)
+    var a1    = document.createElement('a')
+    a1.href = url1; a1.download = 'menu.js'; a1.click()
+    URL.revokeObjectURL(url1)
+    setTimeout(function() {
+      var blob2 = new Blob([pinContent], { type: 'text/javascript' })
+      var url2  = URL.createObjectURL(blob2)
+      var a2    = document.createElement('a')
+      a2.href = url2; a2.download = 'pin-config.js'; a2.click()
+      URL.revokeObjectURL(url2)
+    }, 300)
+    showToast('⬇ Files downloaded. Set up GitHub deploy in Settings → Deploy for one-click publishing.', 'info')
+  }
+}
+
+async function _ghPushFile(token, repo, path, content) {
+  var url = 'https://api.github.com/repos/' + repo + '/contents/' + path
+  var headers = {
+    'Authorization': 'token ' + token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  }
+  var sha = null
+  var getRes = await fetch(url, { headers: headers })
+  if (getRes.ok) {
+    sha = (await getRes.json()).sha
+  } else if (getRes.status !== 404) {
+    throw new Error('GitHub error ' + getRes.status + ' getting ' + path)
+  }
+  var body = {
+    message: 'Update ' + path + ' via admin panel',
+    content: btoa(unescape(encodeURIComponent(content)))
+  }
+  if (sha) body.sha = sha
+  var putRes = await fetch(url, { method: 'PUT', headers: headers, body: JSON.stringify(body) })
+  if (!putRes.ok) {
+    var e = await putRes.json().catch(function(){ return {} })
+    throw new Error(e.message || 'HTTP ' + putRes.status + ' pushing ' + path)
+  }
+}
+
+function saveDeploySettings() {
+  var token = document.getElementById('deploy-token').value.trim()
+  var repo  = document.getElementById('deploy-repo').value.trim()
+  if (token) localStorage.setItem('scb_github_token', token)
+  else       localStorage.removeItem('scb_github_token')
+  if (repo)  localStorage.setItem('scb_github_repo',  repo)
+  else       localStorage.removeItem('scb_github_repo')
+  var s = document.getElementById('deploy-saved')
+  if (s) { s.style.display = 'inline'; setTimeout(function(){ s.style.display = 'none' }, 2500) }
+}
+
+function toggleTokenVisibility() {
+  var inp = document.getElementById('deploy-token')
+  if (inp) inp.type = inp.type === 'password' ? 'text' : 'password'
+}
+
+function loadDeployForm() {
+  var t = localStorage.getItem('scb_github_token') || ''
+  var r = localStorage.getItem('scb_github_repo')  || ''
+  var ti = document.getElementById('deploy-token')
+  var ri = document.getElementById('deploy-repo')
+  if (ti) ti.value = t
+  if (ri) ri.value = r
 }
 
 function showToast(msg, type) {
@@ -1675,7 +1774,7 @@ var _origSwitchTab = switchTab
 switchTab = function(name) {
   _origSwitchTab(name)
   if (name === 'settings') {
-    loadBrandingForm(); loadPaymentForm(); loadLandingForm()
+    loadBrandingForm(); loadPaymentForm(); loadLandingForm(); loadDeployForm()
     switchSettingsPanel(sessionStorage.getItem('scb_active_spanel') || 'branding')
   }
 }
@@ -1934,7 +2033,7 @@ function renderSetupChecklist() {
     item(brandingOk,'Set store name & branding',"switchTab('settings');switchSettingsPanel('branding')") +
     item(menuOk,    'Add menu items',           "switchTab('menu');openItemModal()") +
     item(paymentOk, 'Configure payment options',"switchTab('settings');switchSettingsPanel('payment')") +
-    item(true,      'Publish to Netlify after changes', '')
+    item(true,      'Publish &amp; Deploy after changes', "switchTab('settings');switchSettingsPanel('deploy')")
 
   document.getElementById('setup-checklist').style.display = 'block'
 }
