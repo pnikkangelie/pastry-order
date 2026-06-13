@@ -530,10 +530,11 @@
     @keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
     .item-sheet {
       background: var(--surface); border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto;
+      width: 100%; max-width: 540px; max-height: 92vh;
       animation: sheetUp .28s cubic-bezier(.22,.68,0,1.12) both;
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; overflow: hidden;
     }
+    .item-sheet-scroll { flex: 1; overflow-y: auto; }
     @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .item-sheet-img { width: 100%; height: 220px; object-fit: cover; border-radius: 24px 24px 0 0; display: block; }
     .item-sheet-img-ph { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; background: var(--primary-lt); font-size: 3.5rem; border-radius: 24px 24px 0 0; }
@@ -550,7 +551,7 @@
     .item-sheet-price { font-size: 1.15rem; font-weight: 800; color: var(--primary); flex-shrink: 0; }
     .item-sheet-desc  { font-size: .9rem; color: var(--muted); line-height: 1.7; padding: 0 1.3rem .9rem; }
     .item-sheet-footer {
-      position: sticky; bottom: 0; flex-shrink: 0;
+      flex-shrink: 0;
       background: var(--surface); border-top: 1px solid var(--border);
       padding: .85rem 1.3rem calc(.85rem + env(safe-area-inset-bottom));
       display: flex; gap: .6rem; align-items: center;
@@ -860,18 +861,20 @@
 <!-- ── Item detail bottom sheet ──────────────────────────── -->
 <div class="item-sheet-overlay" id="item-sheet-overlay" onclick="if(event.target===this)closeItemSheet()">
   <div class="item-sheet" id="item-sheet">
-    <div id="sheet-img-wrap"></div>
-    <div class="item-sheet-head">
-      <div>
-        <div class="item-sheet-cat"  id="sheet-cat"></div>
-        <div class="item-sheet-name" id="sheet-name"></div>
+    <div class="item-sheet-scroll">
+      <div id="sheet-img-wrap"></div>
+      <div class="item-sheet-head">
+        <div>
+          <div class="item-sheet-cat"  id="sheet-cat"></div>
+          <div class="item-sheet-name" id="sheet-name"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
+          <button class="item-sheet-close" onclick="closeItemSheet()">✕</button>
+          <div class="item-sheet-price" id="sheet-price"></div>
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
-        <button class="item-sheet-close" onclick="closeItemSheet()">✕</button>
-        <div class="item-sheet-price" id="sheet-price"></div>
-      </div>
+      <div class="item-sheet-desc" id="sheet-desc"></div>
     </div>
-    <div class="item-sheet-desc" id="sheet-desc"></div>
     <div class="item-sheet-footer">
       <button class="item-sheet-add" id="sheet-add-btn" onclick="sheetAddToCart()">Add to Cart</button>
     </div>
